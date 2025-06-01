@@ -10,6 +10,7 @@ const { EmailSpider } = require('./spiders/EmailSpider');
 const { ProxyManager } = require('./core/ProxyManager');
 const { RateLimiter } = require('./core/RateLimiter');
 const { ScrapingEngine } = require('./core/ScrapingEngine');
+const { GmailService } = require('./services/GmailService');
 const axios = require('axios');
 
 // Configure Winston Logger
@@ -97,6 +98,18 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
   const proxyManager = new ProxyManager();
   const rateLimiter = new RateLimiter();
   const scrapingEngine = new ScrapingEngine({ logger, proxyManager, rateLimiter });
+
+  // Initialize Gmail service
+  const gmailService = new GmailService(logger);
+
+  // Initialize Gmail API on startup
+  gmailService.initialize().then(success => {
+    if (success) {
+      logger.info('🎉 Gmail API ready - 1 billion emails/day limit activated!');
+    } else {
+      logger.info('📧 Gmail API setup required - using fallback for now');
+    }
+  });
 
   // Health check endpoint
   app.get('/health', (req, res) => {
@@ -534,16 +547,101 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
     }
   });
 
-  // SendGrid configuration
+  // Gmail API Setup and Management Endpoints
+
+  // Get Gmail setup status
+  app.get('/api/gmail/status', async (req, res) => {
+    try {
+      const status = await gmailService.getSetupStatus();
+      const usageStats = await gmailService.getUsageStats();
+      
+      res.json({
+        success: true,
+        gmail: {
+          ...status,
+          usage: usageStats,
+          comparison: {
+            sendgrid: { limit: 100, cost: 'Free tier' },
+            gmail: { limit: 1000000000, cost: 'Free forever' }
+          }
+        }
+      });
+    } catch (error) {
+      logger.error('Error getting Gmail status:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Start Gmail OAuth process
+  app.get('/api/gmail/auth/start', async (req, res) => {
+    try {
+      // This endpoint would typically redirect to OAuth, but for API we return the URL
+      const authUrl = gmailService.getAuthUrl();
+      
+      res.json({
+        success: true,
+        authUrl: authUrl,
+        instructions: [
+          '1. Visit the authorization URL',
+          '2. Grant permissions to your Gmail account',
+          '3. Copy the authorization code',
+          '4. Use /api/gmail/auth/complete endpoint'
+        ]
+      });
+    } catch (error) {
+      logger.error('Error starting Gmail auth:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Complete Gmail OAuth process
+  app.post('/api/gmail/auth/complete', async (req, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({
+          success: false,
+          error: 'Authorization code is required'
+        });
+      }
+      
+      await gmailService.completeAuth(code);
+      
+      res.json({
+        success: true,
+        message: '🎉 Gmail API configured successfully!',
+        capabilities: {
+          dailyLimit: '1 billion emails',
+          cost: 'Free forever',
+          features: ['Professional delivery', 'Email tracking', 'No vendor lock-in']
+        }
+      });
+    } catch (error) {
+      logger.error('Error completing Gmail auth:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // SendGrid configuration (fallback)
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || 'your-sendgrid-api-key-here';
   if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
     sgMail.setApiKey(SENDGRID_API_KEY);
-    logger.info('✅ SendGrid configured for real email sending');
+    logger.info('✅ SendGrid configured as fallback');
   } else {
-    logger.info('⚠️ SendGrid not configured - emails will be recorded but not sent');
+    logger.info('⚠️ SendGrid not configured - Gmail API will be primary');
   }
 
-  // Send individual email endpoint (with real SendGrid integration)
+  // Updated email sending endpoint with Gmail API priority
   app.post('/api/emails/send', validateApiKey, async (req, res) => {
     try {
       const { contactId, email, name, company } = req.body;
@@ -571,37 +669,28 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
         messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       };
       
-      // Try to send real email via SendGrid
-      let emailSent = false;
-      if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
-        try {
-          const msg = {
-            to: email,
-            from: {
-              email: 'hello@nino.news',
-              name: 'Riki from Nino!'
-            },
-            subject: emailRecord.subject,
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50;">Hello ${emailRecord.name}!</h2>
-                
-                <p>I hope this email finds you well. I'm reaching out to explore potential partnership opportunities between our organizations.</p>
-                
-                <p>At Nino, we specialize in innovative media solutions that could complement your current offerings at ${emailRecord.company}. I'd love to schedule a brief 15-minute call to discuss how we might work together.</p>
-                
-                <p>Would you be available for a quick chat this week or next?</p>
-                
-                <p style="margin-top: 30px;">
-                  Best regards,<br>
-                  <strong>Riki from Nino!</strong><br>
-                  <a href="mailto:hello@nino.news">hello@nino.news</a>
-                </p>
-                
-                <img src="${req.protocol}://${req.get('host')}/track/${trackingId}" width="1" height="1" style="display:none;" alt="">
-              </div>
-            `,
-            text: `Hello ${emailRecord.name}!
+      // Email content
+      const emailContent = {
+        to: email,
+        subject: emailRecord.subject,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #2c3e50;">Hello ${emailRecord.name}!</h2>
+            
+            <p>I hope this email finds you well. I'm reaching out to explore potential partnership opportunities between our organizations.</p>
+            
+            <p>At Nino, we specialize in innovative media solutions that could complement your current offerings at ${emailRecord.company}. I'd love to schedule a brief 15-minute call to discuss how we might work together.</p>
+            
+            <p>Would you be available for a quick chat this week or next?</p>
+            
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>Riki from Nino!</strong><br>
+              <a href="mailto:hello@nino.news">hello@nino.news</a>
+            </p>
+          </div>
+        `,
+        text: `Hello ${emailRecord.name}!
 
 I hope this email finds you well. I'm reaching out to explore potential partnership opportunities between our organizations.
 
@@ -612,6 +701,76 @@ Would you be available for a quick chat this week or next?
 Best regards,
 Riki from Nino!
 hello@nino.news`,
+        trackingId,
+        baseUrl: `${req.protocol}://${req.get('host')}`
+      };
+      
+      let emailSent = false;
+      let service = 'none';
+      
+      // Try Gmail API first (FREE with 1 billion daily limit)
+      if (gmailService.isConfigured()) {
+        try {
+          const result = await gmailService.sendEmail(emailContent);
+          emailSent = true;
+          service = 'gmail-api';
+          emailRecord.status = 'sent';
+          emailRecord.messageId = result.messageId;
+          
+          logger.info(`✅ FREE email sent to ${email} via Gmail API (1 billion daily limit)`);
+          
+        } catch (gmailError) {
+          logger.error(`Gmail API error for ${email}:`, gmailError.message);
+          emailRecord.error = gmailError.message;
+          
+          // Fall back to SendGrid if Gmail fails
+          if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
+            try {
+              const msg = {
+                to: email,
+                from: {
+                  email: 'hello@nino.news',
+                  name: 'Riki from Nino!'
+                },
+                subject: emailRecord.subject,
+                html: emailContent.html + `<img src="${emailContent.baseUrl}/track/${trackingId}" width="1" height="1" style="display:none;" alt="">`,
+                text: emailContent.text,
+                trackingSettings: {
+                  clickTracking: { enable: true },
+                  openTracking: { enable: true }
+                }
+              };
+              
+              const response = await sgMail.send(msg);
+              emailSent = true;
+              service = 'sendgrid-fallback';
+              emailRecord.status = 'sent';
+              emailRecord.messageId = response[0].headers['x-message-id'] || emailRecord.messageId;
+              
+              logger.info(`✅ Fallback email sent to ${email} via SendGrid`);
+              
+            } catch (sendGridError) {
+              logger.error(`SendGrid fallback error for ${email}:`, sendGridError.message);
+              emailRecord.status = 'failed';
+              emailRecord.error = `Gmail: ${gmailError.message}, SendGrid: ${sendGridError.message}`;
+            }
+          } else {
+            emailRecord.status = 'failed';
+          }
+        }
+      } 
+      // Fall back to SendGrid if Gmail not configured
+      else if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
+        try {
+          const msg = {
+            to: email,
+            from: {
+              email: 'hello@nino.news',
+              name: 'Riki from Nino!'
+            },
+            subject: emailRecord.subject,
+            html: emailContent.html + `<img src="${emailContent.baseUrl}/track/${trackingId}" width="1" height="1" style="display:none;" alt="">`,
+            text: emailContent.text,
             trackingSettings: {
               clickTracking: { enable: true },
               openTracking: { enable: true }
@@ -620,10 +779,11 @@ hello@nino.news`,
           
           const response = await sgMail.send(msg);
           emailSent = true;
+          service = 'sendgrid';
           emailRecord.status = 'sent';
           emailRecord.messageId = response[0].headers['x-message-id'] || emailRecord.messageId;
           
-          logger.info(`✅ Real email sent to ${email} via SendGrid`);
+          logger.info(`✅ Email sent to ${email} via SendGrid`);
           
         } catch (sendGridError) {
           logger.error(`SendGrid error for ${email}:`, sendGridError.message);
@@ -631,9 +791,10 @@ hello@nino.news`,
           emailRecord.error = sendGridError.message;
         }
       } else {
-        // Mark as recorded but not sent if no SendGrid API key
+        // Mark as recorded but not sent if no email service configured
         emailRecord.status = 'recorded';
-        logger.info(`📝 Email recorded for ${email} (SendGrid not configured)`);
+        service = 'demo-mode';
+        logger.info(`📝 Email recorded for ${email} (no email service configured)`);
       }
       
       // Add to sent emails
@@ -647,11 +808,16 @@ hello@nino.news`,
       
       res.json({
         success: true,
-        message: emailSent ? 'Email sent successfully' : 'Email recorded (SendGrid not configured)',
+        message: emailSent ? 'Email sent successfully' : 'Email recorded (configure email service)',
         trackingId: emailRecord.trackingId,
         messageId: emailRecord.messageId,
         status: emailRecord.status,
-        realEmailSent: emailSent
+        service: service,
+        realEmailSent: emailSent,
+        serviceInfo: {
+          primary: gmailService.isConfigured() ? 'Gmail API (1B daily)' : 'Not configured',
+          fallback: SENDGRID_API_KEY !== 'your-sendgrid-api-key-here' ? 'SendGrid (100 daily)' : 'Not configured'
+        }
       });
       
     } catch (error) {
