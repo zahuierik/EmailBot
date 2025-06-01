@@ -13,7 +13,7 @@
 // Configuration - UPDATE THESE VALUES
 const FROM_EMAIL = 'hello@nino.news';
 const FROM_NAME = 'Riki from Nino!';
-const BACKEND_URL = 'https://email-manager-backend.onrender.com'; // Update this with your actual Render URL
+const BACKEND_URL = 'https://emailbot-f71m.onrender.com'; // User's actual Render URL
 const API_KEY = 'development-mode'; // Any value works in development mode
 const DAILY_LIMIT = 30;
 

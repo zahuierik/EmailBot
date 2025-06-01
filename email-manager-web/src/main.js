@@ -7,7 +7,7 @@ console.log('🚀 Email Manager Pro loading...');
 const CONFIG = {
   API_BASE_URL: window.location.hostname === 'localhost' 
     ? 'http://localhost:3001' 
-    : 'https://email-manager-backend.onrender.com', // Update this with your actual Render URL
+    : 'https://emailbot-f71m.onrender.com', // User's actual Render URL
   OPENROUTER_API_KEY: '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'
 };
 
@@ -63,7 +63,7 @@ function initializeApp() {
 async function loadDataFromBackend() {
   try {
     // Load contacts
-    const contactsResponse = await fetch('http://localhost:3001/api/contacts');
+    const contactsResponse = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`);
     if (contactsResponse.ok) {
       const contactsData = await contactsResponse.json();
       if (contactsData.success && contactsData.contacts) {
@@ -73,7 +73,7 @@ async function loadDataFromBackend() {
     }
     
     // Load sent emails
-    const sentResponse = await fetch('http://localhost:3001/api/emails/sent');
+    const sentResponse = await fetch(`${CONFIG.API_BASE_URL}/api/emails/sent`);
     if (sentResponse.ok) {
       const sentData = await sentResponse.json();
       if (sentData.success && sentData.emails) {
@@ -461,7 +461,7 @@ async function handleAddContacts(message) {
     }));
     
     // Send to backend API
-    const response = await fetch('http://localhost:3001/api/contacts', {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -776,7 +776,7 @@ async function handleScraping(url) {
       
       try {
         // Save to backend
-        const saveResponse = await fetch('http://localhost:3001/api/contacts', {
+        const saveResponse = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1277,7 +1277,7 @@ function sendPersonalizedEmail(toEmail, toName) {
 }
 
 function isValidEmail(email) {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return emailRegex.test(email);
 }
 
