@@ -5,6 +5,7 @@ const compression = require('compression');
 const cluster = require('cluster');
 const os = require('os');
 const winston = require('winston');
+const sgMail = require('@sendgrid/mail');
 const { EmailSpider } = require('./spiders/EmailSpider');
 const { ProxyManager } = require('./core/ProxyManager');
 const { RateLimiter } = require('./core/RateLimiter');
@@ -533,7 +534,16 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
     }
   });
 
-  // Send individual email endpoint (triggers Google Apps Script or direct sending)
+  // SendGrid configuration
+  const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || 'your-sendgrid-api-key-here';
+  if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
+    sgMail.setApiKey(SENDGRID_API_KEY);
+    logger.info('✅ SendGrid configured for real email sending');
+  } else {
+    logger.info('⚠️ SendGrid not configured - emails will be recorded but not sent');
+  }
+
+  // Send individual email endpoint (with real SendGrid integration)
   app.post('/api/emails/send', validateApiKey, async (req, res) => {
     try {
       const { contactId, email, name, company } = req.body;
@@ -555,11 +565,76 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
         name: name || extractNameFromEmail(email),
         company: company || extractCompanyFromEmail(email),
         subject: `Partnership Opportunity - ${company || extractCompanyFromEmail(email)}`,
-        status: 'sent',
+        status: 'pending',
         sentDate: new Date().toISOString(),
         trackingId,
         messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       };
+      
+      // Try to send real email via SendGrid
+      let emailSent = false;
+      if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'your-sendgrid-api-key-here') {
+        try {
+          const msg = {
+            to: email,
+            from: {
+              email: 'hello@nino.news',
+              name: 'Riki from Nino!'
+            },
+            subject: emailRecord.subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2c3e50;">Hello ${emailRecord.name}!</h2>
+                
+                <p>I hope this email finds you well. I'm reaching out to explore potential partnership opportunities between our organizations.</p>
+                
+                <p>At Nino, we specialize in innovative media solutions that could complement your current offerings at ${emailRecord.company}. I'd love to schedule a brief 15-minute call to discuss how we might work together.</p>
+                
+                <p>Would you be available for a quick chat this week or next?</p>
+                
+                <p style="margin-top: 30px;">
+                  Best regards,<br>
+                  <strong>Riki from Nino!</strong><br>
+                  <a href="mailto:hello@nino.news">hello@nino.news</a>
+                </p>
+                
+                <img src="${req.protocol}://${req.get('host')}/track/${trackingId}" width="1" height="1" style="display:none;" alt="">
+              </div>
+            `,
+            text: `Hello ${emailRecord.name}!
+
+I hope this email finds you well. I'm reaching out to explore potential partnership opportunities between our organizations.
+
+At Nino, we specialize in innovative media solutions that could complement your current offerings at ${emailRecord.company}. I'd love to schedule a brief 15-minute call to discuss how we might work together.
+
+Would you be available for a quick chat this week or next?
+
+Best regards,
+Riki from Nino!
+hello@nino.news`,
+            trackingSettings: {
+              clickTracking: { enable: true },
+              openTracking: { enable: true }
+            }
+          };
+          
+          const response = await sgMail.send(msg);
+          emailSent = true;
+          emailRecord.status = 'sent';
+          emailRecord.messageId = response[0].headers['x-message-id'] || emailRecord.messageId;
+          
+          logger.info(`✅ Real email sent to ${email} via SendGrid`);
+          
+        } catch (sendGridError) {
+          logger.error(`SendGrid error for ${email}:`, sendGridError.message);
+          emailRecord.status = 'failed';
+          emailRecord.error = sendGridError.message;
+        }
+      } else {
+        // Mark as recorded but not sent if no SendGrid API key
+        emailRecord.status = 'recorded';
+        logger.info(`📝 Email recorded for ${email} (SendGrid not configured)`);
+      }
       
       // Add to sent emails
       sentEmails.push(emailRecord);
@@ -570,17 +645,17 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
         contacts.splice(contactIndex, 1);
       }
       
-      logger.info(`API: Email sent to ${email}`);
-      
       res.json({
         success: true,
-        message: 'Email sent successfully',
+        message: emailSent ? 'Email sent successfully' : 'Email recorded (SendGrid not configured)',
         trackingId: emailRecord.trackingId,
-        messageId: emailRecord.messageId
+        messageId: emailRecord.messageId,
+        status: emailRecord.status,
+        realEmailSent: emailSent
       });
       
     } catch (error) {
-      logger.error('Error sending email:', error);
+      logger.error('Error in email endpoint:', error);
       res.status(500).json({
         success: false,
         error: error.message
