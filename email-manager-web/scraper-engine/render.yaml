@@ -10,8 +10,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3001
       - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
         value: true
       - key: PUPPETEER_EXECUTABLE_PATH
@@ -30,6 +28,9 @@ services:
         value: 900000
       - key: CORS_ORIGIN
         value: https://email-scraper-pro.vercel.app
+      - key: HOST
+        value: 0.0.0.0
     buildCommand: npm install --omit=dev
     startCommand: npm start
-    healthCheckPath: /health 
+    healthCheckPath: /health
+    region: oregon 

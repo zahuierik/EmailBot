@@ -299,11 +299,14 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
   });
 
   // Start server
-  app.listen(PORT, () => {
-    logger.info(`Email Scraper Pro worker ${process.pid} listening on port ${PORT}`);
+  const HOST = process.env.HOST || '0.0.0.0'; // Bind to all interfaces for Render.com
+  app.listen(PORT, HOST, () => {
+    logger.info(`Email Scraper Pro worker ${process.pid} listening on ${HOST}:${PORT}`);
     logger.info('🕷️  Advanced web scraping engine ready!');
     logger.info('📧 Email extraction capabilities activated');
     logger.info('🚀 Production-grade scraping inspired by Scrapy');
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`Render Service: ${process.env.RENDER_SERVICE_NAME || 'local'}`);
   });
 
   // Graceful shutdown
