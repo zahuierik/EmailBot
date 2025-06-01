@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Manager Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Navigation -->
+      <nav class="navbar">
+        <div class="nav-container">
+          <div class="nav-brand">
+            <span class="material-icons">email</span>
+            <h1>Email Manager Pro</h1>
+          </div>
+          <button class="refresh-btn" onclick="refreshData()">
+            <span class="material-icons">refresh</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+          <div class="welcome-card">
+            <div class="welcome-header">
+              <div class="icon-container">
+                <span class="material-icons">email</span>
+              </div>
+              <div class="welcome-text">
+                <h2>Welcome to Email Manager Pro</h2>
+                <p>Advanced email extraction and management system</p>
+              </div>
+            </div>
+            <div class="feature-chips">
+              <div class="chip">
+                <span class="material-icons">file_upload</span>
+                CSV Import
+              </div>
+              <div class="chip">
+                <span class="material-icons">web</span>
+                Web Scraping
+              </div>
+              <div class="chip">
+                <span class="material-icons">email</span>
+                Email Sending
+              </div>
+              <div class="chip">
+                <span class="material-icons">analytics</span>
+                Analytics
+              </div>
+              <div class="chip success">
+                <span class="material-icons">verified</span>
+                GDPR Compliant
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Statistics -->
+        <section class="stats-section">
+          <h3>Quick Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-card primary">
+              <div class="stat-header">
+                <span class="material-icons">contacts</span>
+                <span class="stat-title">Total Contacts</span>
+              </div>
+              <div class="stat-value" id="totalContacts">0</div>
+            </div>
+            <div class="stat-card tertiary">
+              <div class="stat-header">
+                <span class="material-icons">mark_email_read</span>
+                <span class="stat-title">Valid Emails</span>
+              </div>
+              <div class="stat-value" id="validEmails">0</div>
+            </div>
+            <div class="stat-card secondary">
+              <div class="stat-header">
+                <span class="material-icons">send</span>
+                <span class="stat-title">Emails Sent Today</span>
+              </div>
+              <div class="stat-value" id="emailsSentToday">0</div>
+            </div>
+            <div class="stat-card outline">
+              <div class="stat-header">
+                <span class="material-icons">schedule</span>
+                <span class="stat-title">Daily Limit Remaining</span>
+              </div>
+              <div class="stat-value" id="dailyLimitRemaining">30</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Extraction Options -->
+        <section class="extraction-section">
+          <div class="card">
+            <h3>Data Extraction</h3>
+            <div class="extraction-buttons">
+              <button class="btn primary" onclick="showImportDemo()">
+                <span class="material-icons">file_upload</span>
+                Import CSV File
+              </button>
+              <button class="btn primary" onclick="showScrapingDemo()">
+                <span class="material-icons">web</span>
+                Web Scraping
+              </button>
+            </div>
+            <div class="url-input-container">
+              <div class="input-group">
+                <span class="material-icons">link</span>
+                <input type="text" id="urlInput" placeholder="Enter URL to scrape emails from..." />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+          <div class="card">
+            <h3>Quick Actions</h3>
+            <div class="action-list">
+              <div class="action-item" onclick="simulateEmailSent()">
+                <div class="action-icon">
+                  <span class="material-icons">send</span>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">Send Test Email</div>
+                  <div class="action-subtitle">Send a test email to verify configuration</div>
+                </div>
+                <span class="material-icons">arrow_forward_ios</span>
+              </div>
+              <div class="divider"></div>
+              <div class="action-item" onclick="showConfigDemo()">
+                <div class="action-icon">
+                  <span class="material-icons">settings</span>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">Email Configuration</div>
+                  <div class="action-subtitle">Configure SendGrid API settings</div>
+                </div>
+                <span class="material-icons">arrow_forward_ios</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+          <div class="nav-item active" onclick="switchTab('home')">
+            <span class="material-icons">home</span>
+            <span>Home</span>
+          </div>
+          <div class="nav-item" onclick="switchTab('contacts')">
+            <span class="material-icons">contacts</span>
+            <span>Contacts</span>
+          </div>
+          <div class="nav-item" onclick="switchTab('analytics')">
+            <span class="material-icons">analytics</span>
+            <span>Analytics</span>
+          </div>
+          <div class="nav-item" onclick="switchTab('settings')">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+          </div>
+        </nav>
+      </main>
+
+      <!-- Modal Overlay -->
+      <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h4 id="modalTitle">Modal Title</h4>
+            <button class="close-btn" onclick="closeModal()">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+          <div class="modal-content" id="modalContent">
+            Modal content goes here
+          </div>
+          <div class="modal-actions">
+            <button class="btn secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn primary" id="modalAction" onclick="closeModal()">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast Notification -->
+      <div id="toast" class="toast">
+        <span class="material-icons">check_circle</span>
+        <span id="toastMessage">Success message</span>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html> 
