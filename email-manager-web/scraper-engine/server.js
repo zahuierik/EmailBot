@@ -67,7 +67,9 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
         'http://localhost:5176',
         'https://email-scraper-pro.vercel.app',
         'https://email-scraper-pro-git-main-rikis-projects-6e4b52d3.vercel.app',
-        'https://email-scraper-pro-rikis-projects-6e4b52d3.vercel.app'
+        'https://email-scraper-pro-rikis-projects-6e4b52d3.vercel.app',
+        'https://email-scraper-6zmgh0npv-rikis-projects-6e4b52d3.vercel.app',
+        'https://email-scraper-i4nomsj5b-rikis-projects-6e4b52d3.vercel.app'
       ];
       
       // Add dynamic Vercel preview URLs
