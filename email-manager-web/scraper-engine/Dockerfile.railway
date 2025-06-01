@@ -1,0 +1,46 @@
+FROM node:18-alpine
+
+# Set production environment
+ENV NODE_ENV=production
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Install only essential packages for Puppeteer in one layer
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates \
+    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+
+# Create app directory and set permissions
+WORKDIR /usr/src/app
+
+# Copy minimal package.json for faster builds
+COPY package-prod.json package.json
+
+# Install dependencies with aggressive optimizations
+RUN npm ci --omit=dev --no-audit --no-fund --silent \
+    && npm cache clean --force \
+    && rm -rf /tmp/* ~/.npm
+
+# Copy application code
+COPY server.js ./
+COPY core/ ./core/
+COPY spiders/ ./spiders/
+COPY logs/ ./logs/
+
+# Create non-root user and set permissions
+RUN addgroup -g 1001 -S nodejs \
+    && adduser -S scraper -u 1001 -G nodejs \
+    && chown -R scraper:nodejs /usr/src/app \
+    && mkdir -p logs \
+    && chown scraper:nodejs logs
+
+USER scraper
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+
+# Start the application
+CMD ["node", "server.js"] 

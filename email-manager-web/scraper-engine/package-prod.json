@@ -1,0 +1,31 @@
+{
+  "name": "email-scraper-pro",
+  "version": "1.0.0",
+  "description": "Production-grade email extraction engine",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "node -e \"console.log('Installation completed successfully')\""
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "winston": "^3.13.0",
+    "puppeteer": "^22.15.0",
+    "user-agents": "^1.1.174",
+    "rate-limiter-flexible": "^5.0.5",
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "validator": "^13.12.0",
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["web-scraping", "email-extraction"],
+  "author": "Email Manager Pro",
+  "license": "MIT"
+} 
