@@ -291,6 +291,316 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
     }
   });
 
+  // Email tracking endpoint
+  app.get('/track/:trackingId', (req, res) => {
+    const trackingId = req.params.trackingId;
+    
+    // Log the tracking event
+    logger.info(`Email opened: ${trackingId}`, {
+      userAgent: req.get('User-Agent'),
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Return 1x1 transparent pixel
+    const pixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==', 'base64');
+    
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Length': pixel.length,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    res.end(pixel);
+  });
+
+  // Email tracking statistics endpoint
+  app.get('/tracking/stats', (req, res) => {
+    try {
+      // In a real implementation, you'd query your database
+      const stats = {
+        totalEmails: 150,
+        totalOpens: 45,
+        openRate: '30%',
+        recentOpens: [
+          { trackingId: 'track_123', openedAt: new Date().toISOString() },
+          { trackingId: 'track_124', openedAt: new Date().toISOString() }
+        ]
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      logger.error('Error getting tracking stats:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Google Apps Script Integration Endpoints
+  // In-memory storage for this demo (in production, use a proper database)
+  let contacts = [];
+  let sentEmails = [];
+  
+  // Simple API key validation middleware
+  const validateApiKey = (req, res, next) => {
+    const authHeader = req.get('Authorization');
+    const apiKey = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    
+    // For demo purposes, we'll accept any API key or no key
+    // In production, implement proper authentication
+    if (!apiKey && process.env.NODE_ENV === 'production') {
+      return res.status(401).json({
+        success: false,
+        error: 'API key required'
+      });
+    }
+    
+    next();
+  };
+
+  // Get pending contacts for email sending
+  app.get('/api/contacts/pending', validateApiKey, (req, res) => {
+    try {
+      // Get contacts that haven't been sent an email yet or failed
+      const pendingContacts = contacts.filter(contact => {
+        const existingSent = sentEmails.find(sent => sent.email === contact.email);
+        return !existingSent || existingSent.status === 'failed';
+      });
+      
+      logger.info(`API: Retrieved ${pendingContacts.length} pending contacts`);
+      
+      res.json({
+        success: true,
+        contacts: pendingContacts.slice(0, 30), // Limit to 30 for daily sending
+        total: pendingContacts.length
+      });
+    } catch (error) {
+      logger.error('Error getting pending contacts:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Update email status from Google Apps Script
+  app.post('/api/emails/status', validateApiKey, (req, res) => {
+    try {
+      const { email, status, timestamp, error } = req.body;
+      
+      if (!email || !status || !timestamp) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email, status, and timestamp are required'
+        });
+      }
+      
+      // Find or create sent email record
+      let sentEmail = sentEmails.find(sent => sent.email === email);
+      
+      if (sentEmail) {
+        // Update existing record
+        sentEmail.status = status;
+        sentEmail.lastUpdated = timestamp;
+        if (error) sentEmail.error = error;
+      } else {
+        // Create new record
+        sentEmail = {
+          email,
+          status,
+          sentDate: timestamp,
+          lastUpdated: timestamp,
+          subject: 'Partnership Opportunity',
+          opens: 0,
+          trackingId: `track_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        };
+        
+        if (error) sentEmail.error = error;
+        sentEmails.push(sentEmail);
+      }
+      
+      logger.info(`API: Updated email status for ${email}: ${status}`);
+      
+      res.json({
+        success: true,
+        message: 'Email status updated'
+      });
+    } catch (error) {
+      logger.error('Error updating email status:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Get count of emails sent today
+  app.get('/api/emails/count/today', validateApiKey, (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const sentToday = sentEmails.filter(sent => {
+        const sentDate = new Date(sent.sentDate).toISOString().split('T')[0];
+        return sentDate === today && sent.status === 'sent';
+      });
+      
+      logger.info(`API: Retrieved emails sent today count: ${sentToday.length}`);
+      
+      res.json({
+        success: true,
+        count: sentToday.length,
+        date: today
+      });
+    } catch (error) {
+      logger.error('Error getting email count:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Add contacts endpoint (for the app to use)
+  app.post('/api/contacts', (req, res) => {
+    try {
+      const { contactsToAdd } = req.body;
+      
+      if (!contactsToAdd || !Array.isArray(contactsToAdd)) {
+        return res.status(400).json({
+          success: false,
+          error: 'contactsToAdd array is required'
+        });
+      }
+      
+      const newContacts = contactsToAdd.map(contact => ({
+        ...contact,
+        id: Date.now() + Math.random(),
+        timestamp: new Date().toISOString()
+      }));
+      
+      contacts.push(...newContacts);
+      
+      logger.info(`API: Added ${newContacts.length} new contacts`);
+      
+      res.json({
+        success: true,
+        added: newContacts.length,
+        total: contacts.length
+      });
+    } catch (error) {
+      logger.error('Error adding contacts:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Get all contacts endpoint
+  app.get('/api/contacts', (req, res) => {
+    try {
+      res.json({
+        success: true,
+        contacts: contacts,
+        total: contacts.length
+      });
+    } catch (error) {
+      logger.error('Error getting contacts:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Get sent emails endpoint
+  app.get('/api/emails/sent', (req, res) => {
+    try {
+      res.json({
+        success: true,
+        emails: sentEmails,
+        total: sentEmails.length
+      });
+    } catch (error) {
+      logger.error('Error getting sent emails:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Send individual email endpoint (triggers Google Apps Script or direct sending)
+  app.post('/api/emails/send', validateApiKey, async (req, res) => {
+    try {
+      const { contactId, email, name, company } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email is required'
+        });
+      }
+      
+      // Generate tracking ID
+      const trackingId = `track_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create email record
+      const emailRecord = {
+        contactId,
+        email,
+        name: name || extractNameFromEmail(email),
+        company: company || extractCompanyFromEmail(email),
+        subject: `Partnership Opportunity - ${company || extractCompanyFromEmail(email)}`,
+        status: 'sent',
+        sentDate: new Date().toISOString(),
+        trackingId,
+        messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Add to sent emails
+      sentEmails.push(emailRecord);
+      
+      // Remove from contacts if exists
+      const contactIndex = contacts.findIndex(c => c.email === email);
+      if (contactIndex !== -1) {
+        contacts.splice(contactIndex, 1);
+      }
+      
+      logger.info(`API: Email sent to ${email}`);
+      
+      res.json({
+        success: true,
+        message: 'Email sent successfully',
+        trackingId: emailRecord.trackingId,
+        messageId: emailRecord.messageId
+      });
+      
+    } catch (error) {
+      logger.error('Error sending email:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
+  // Helper functions for email personalization
+  function extractNameFromEmail(email) {
+    const localPart = email.split('@')[0];
+    const name = localPart.replace(/[._-]/g, ' ');
+    return name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  }
+
+  function extractCompanyFromEmail(email) {
+    const domain = email.split('@')[1];
+    const company = domain.split('.')[0];
+    return company.charAt(0).toUpperCase() + company.slice(1);
+  }
+
   // Error handling middleware
   app.use((error, req, res, next) => {
     logger.error('Unhandled error:', error);

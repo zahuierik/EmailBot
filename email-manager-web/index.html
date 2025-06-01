@@ -59,62 +59,108 @@
           <div class="panel-header">
             <h3>
               <span class="material-icons">contacts</span>
-              Email Contacts
+              Email Manager Pro
             </h3>
             <div class="header-actions">
-              <button class="action-btn config-btn" onclick="showConfigModal()" title="Google Apps Script Configurator">
-                <span class="material-icons">settings</span>
-              </button>
               <button class="action-btn close-btn" onclick="closeContactsPanel()">
                 <span class="material-icons">close</span>
               </button>
             </div>
           </div>
 
-          <!-- Contacts Stats -->
-          <div class="contacts-stats">
-            <div class="stat-item">
-              <span class="stat-value" id="totalContacts">0</span>
-              <span class="stat-label">Total Contacts</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="enrichedContacts">0</span>
-              <span class="stat-label">Enriched</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="topDomains">0</span>
-              <span class="stat-label">Domains</span>
+          <!-- Contact Tabs -->
+          <div class="contact-tabs">
+            <button class="tab-btn active" onclick="switchTab('contacts')" id="contactsTab">
+              <span class="material-icons">contacts</span>
+              Contacts (<span id="contactsCount">0</span>)
+            </button>
+            <button class="tab-btn" onclick="switchTab('sent')" id="sentTab">
+              <span class="material-icons">send</span>
+              Sent (<span id="sentCount">0</span>)
+            </button>
+          </div>
+
+          <!-- Contacts Content -->
+          <div id="contactsContent" class="tab-content active">
+            <div class="contacts-table-container">
+              <table id="contactsTable" class="contacts-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Date Added</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="contactsTableBody">
+                  <!-- Contacts will be populated here -->
+                </tbody>
+              </table>
+              <div id="emptyContactsState" class="empty-contacts-state">
+                <span class="material-icons">contact_mail</span>
+                <h3>No contacts yet</h3>
+                <p>Upload a file or scrape a website to start building your contact list.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Contacts Table -->
-          <div class="contacts-table-container">
-            <table id="contactsTable" class="contacts-table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Company</th>
-                  <th>Source</th>
-                  <th>Popularity</th>
-                  <th>Date Added</th>
-                </tr>
-              </thead>
-              <tbody id="contactsTableBody">
-                <!-- Contacts will be populated here -->
-              </tbody>
-            </table>
-            <div id="emptyContactsState" class="empty-contacts-state">
-              <span class="material-icons">contact_mail</span>
-              <h3>No contacts yet</h3>
-              <p>Upload a file or scrape a website to start building your contact list.</p>
+          <!-- Sent Content -->
+          <div id="sentContent" class="tab-content">
+            <div class="sent-stats">
+              <div class="stat-item">
+                <span class="stat-value" id="totalSent">0</span>
+                <span class="stat-label">Total Sent</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="totalOpened">0</span>
+                <span class="stat-label">Opened</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="openRate">0%</span>
+                <span class="stat-label">Open Rate</span>
+              </div>
+            </div>
+            <div class="contacts-table-container">
+              <table id="sentTable" class="contacts-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Sent Date</th>
+                    <th>Status</th>
+                    <th>Opens</th>
+                  </tr>
+                </thead>
+                <tbody id="sentTableBody">
+                  <!-- Sent emails will be populated here -->
+                </tbody>
+              </table>
+              <div id="emptySentState" class="empty-contacts-state">
+                <span class="material-icons">send</span>
+                <h3>No emails sent yet</h3>
+                <p>Start your email campaign to see sent emails and open rates here.</p>
+              </div>
             </div>
           </div>
 
           <!-- Panel Actions -->
           <div class="panel-actions">
+            <button class="btn primary" onclick="sendAllEmails()">
+              <span class="material-icons">send</span>
+              Send All (30/day)
+            </button>
+            <button class="btn secondary" onclick="startEmailCampaign()">
+              <span class="material-icons">campaign</span>
+              Auto Campaign
+            </button>
             <button class="btn secondary" onclick="exportContacts()">
               <span class="material-icons">download</span>
               Export CSV
+            </button>
+            <button class="btn secondary" onclick="showConfigModal()">
+              <span class="material-icons">settings</span>
+              Configure Script
             </button>
             <button class="btn secondary" onclick="clearContacts()">
               <span class="material-icons">delete</span>
@@ -125,39 +171,47 @@
       </div>
 
       <!-- Configuration Modal -->
-      <div id="configModal" class="modal-overlay">
-        <div class="config-modal">
+      <div id="configModal" class="modal">
+        <div class="modal-content">
           <div class="modal-header">
-            <h3>Google Apps Script Configurator</h3>
+            <h3>
+              <span class="material-icons">settings</span>
+              Google Apps Script Configuration
+            </h3>
             <button class="close-btn" onclick="closeConfigModal()">
               <span class="material-icons">close</span>
             </button>
           </div>
           
-          <div class="modal-content">
-            <div class="input-group">
-              <label for="userEmail">Your Email</label>
-              <input type="email" id="userEmail" placeholder="your.email@gmail.com" />
+          <div class="modal-body">
+            <p>Configure your Google Apps Script to connect directly to this Email Manager Pro app. Your app will be the single source of truth for contacts and email status tracking.</p>
+            
+            <div class="form-group">
+              <label for="fromEmail">From Email (your Gmail)</label>
+              <input type="email" id="fromEmail" placeholder="your-email@gmail.com" />
             </div>
             
-            <div class="input-group">
-              <label for="userName">Your Name</label>
-              <input type="text" id="userName" placeholder="Your Full Name" />
+            <div class="form-group">
+              <label for="fromName">From Name</label>
+              <input type="text" id="fromName" placeholder="Your Name" />
             </div>
-
-            <div class="script-section">
-              <h4>Google Apps Script Code</h4>
-              <textarea id="scriptCode" readonly></textarea>
-              <button class="copy-btn" onclick="copyScript()">
-                <span class="material-icons">content_copy</span>
-                Copy Script
-              </button>
+            
+            <div class="form-group">
+              <label for="backendUrl">Backend URL</label>
+              <input type="url" id="backendUrl" placeholder="http://localhost:3001" />
+              <small>This is where your Email Manager Pro backend is running</small>
             </div>
-
-            <div class="modal-actions">
-              <button class="btn secondary" onclick="closeConfigModal()">Cancel</button>
-              <button class="btn primary" onclick="saveConfiguration()">Save Configuration</button>
+            
+            <div class="form-group">
+              <label for="scriptCode">Google Apps Script Code</label>
+              <textarea id="scriptCode" rows="10" readonly placeholder="Click 'Generate Script' to create the code..."></textarea>
             </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="btn secondary" onclick="closeConfigModal()">Cancel</button>
+            <button class="btn primary" onclick="saveConfiguration()">Generate Script</button>
+            <button class="btn success" onclick="copyScript()">Copy Script</button>
           </div>
         </div>
       </div>

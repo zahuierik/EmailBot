@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Function Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Email Manager Pro - Quick Test</h1>
+    <p>This tests the core functionality independently:</p>
+    
+    <button onclick="testBackend()">🔗 Test Backend Connection</button>
+    <button onclick="testAI()">🤖 Test AI Chat</button>
+    <button onclick="testScraping()">🕷️ Test Scraping</button>
+    <button onclick="openMainApp()">🚀 Open Main App</button>
+    
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'result') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function testBackend() {
+            log('Testing backend connection...');
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                const data = await response.json();
+                log(`✅ Backend healthy: ${data.status} (port ${data.port})`, 'success');
+            } catch (error) {
+                log(`❌ Backend error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAI() {
+            log('Testing AI API...');
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer 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',
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin
+                    },
+                    body: JSON.stringify({
+                        model: 'meta-llama/llama-3.1-8b-instruct:free',
+                        messages: [{ role: 'user', content: 'What is 2+2? Answer only with the number.' }],
+                        max_tokens: 10
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const answer = data.choices[0]?.message?.content.trim();
+                    log(`✅ AI responded: "${answer}" (Expected: 4)`, answer.includes('4') ? 'success' : 'error');
+                } else {
+                    log(`❌ AI API error: ${response.status} - ${await response.text()}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ AI error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testScraping() {
+            log('Testing scraping with example.com...');
+            try {
+                const response = await fetch('http://localhost:3001/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: 'https://example.com' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ Scraping works! Found ${data.emails?.length || 0} emails`, 'success');
+                } else {
+                    log(`⚠️ Scraping completed but found no emails`, 'result');
+                }
+            } catch (error) {
+                log(`❌ Scraping error: ${error.message}`, 'error');
+            }
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:5173/', '_blank');
+        }
+
+        // Auto-test backend on load
+        window.addEventListener('load', () => {
+            testBackend();
+        });
+    </script>
+</body>
+</html> 

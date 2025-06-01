@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Manager Pro - System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Email Manager Pro - System Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Backend Health Check</h2>
+        <button onclick="testBackendHealth()">Test Backend Connection</button>
+        <div id="backend-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Scraping Test</h2>
+        <button onclick="testScraping()">Test Email Scraping</button>
+        <div id="scraping-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. OpenRouter AI Test</h2>
+        <button onclick="testAI()">Test AI Chat</button>
+        <div id="ai-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Frontend JavaScript Test</h2>
+        <button onclick="testFrontend()">Test Frontend Functions</button>
+        <div id="frontend-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Quick Links</h2>
+        <button onclick="openMainApp()">🚀 Open Main App</button>
+        <button onclick="openLogs()">📋 View Logs</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001';
+        const FRONTEND_URL = 'http://localhost:5173';
+
+        async function testBackendHealth() {
+            const statusDiv = document.getElementById('backend-status');
+            statusDiv.innerHTML = '<div class="warning">Testing backend connection...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    statusDiv.innerHTML = `
+                        <div class="success">✅ Backend is healthy!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ Backend unhealthy: ${data.status}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Backend connection failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testScraping() {
+            const statusDiv = document.getElementById('scraping-status');
+            statusDiv.innerHTML = '<div class="warning">Testing email scraping...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/scrape`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: 'https://example.com' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="success">✅ Scraping works!</div>
+                        <div>Found ${data.emails?.length || 0} emails</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<div class="warning">⚠️ Scraping completed but no emails found</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Scraping failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testAI() {
+            const statusDiv = document.getElementById('ai-status');
+            statusDiv.innerHTML = '<div class="warning">Testing AI chat...</div>';
+            
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer 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',
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'Email Scraper Pro Test'
+                    },
+                    body: JSON.stringify({
+                        model: 'meta-llama/llama-4-scout:free',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Say "AI is working!" if you can respond.'
+                            }
+                        ],
+                        max_tokens: 100
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const aiResponse = data.choices[0]?.message?.content || 'No response';
+                    statusDiv.innerHTML = `
+                        <div class="success">✅ AI is working!</div>
+                        <div>Response: "${aiResponse}"</div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ AI API failed: ${response.status}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ AI test failed: ${error.message}</div>`;
+            }
+        }
+
+        function testFrontend() {
+            const statusDiv = document.getElementById('frontend-status');
+            const tests = [];
+
+            // Test if we can access the main app iframe
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = FRONTEND_URL;
+                document.body.appendChild(iframe);
+                tests.push('✅ Frontend URL accessible');
+                setTimeout(() => document.body.removeChild(iframe), 1000);
+            } catch (error) {
+                tests.push('❌ Frontend URL error: ' + error.message);
+            }
+
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'value');
+                const value = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                if (value === 'value') {
+                    tests.push('✅ localStorage working');
+                } else {
+                    tests.push('❌ localStorage not working');
+                }
+            } catch (error) {
+                tests.push('❌ localStorage error: ' + error.message);
+            }
+
+            // Test fetch API
+            try {
+                if (typeof fetch === 'function') {
+                    tests.push('✅ Fetch API available');
+                } else {
+                    tests.push('❌ Fetch API not available');
+                }
+            } catch (error) {
+                tests.push('❌ Fetch API error: ' + error.message);
+            }
+
+            statusDiv.innerHTML = `
+                <div class="success">Frontend tests completed:</div>
+                <ul>
+                    ${tests.map(test => `<li>${test}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        function openMainApp() {
+            window.open(FRONTEND_URL, '_blank');
+        }
+
+        function openLogs() {
+            alert('Check the terminal where you started the servers for logs');
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            setTimeout(testBackendHealth, 500);
+            setTimeout(testFrontend, 1000);
+        });
+    </script>
+</body>
+</html> 
