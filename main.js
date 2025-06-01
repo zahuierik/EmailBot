@@ -1,5 +1,3 @@
-import './style.css'
-
 // API Configuration
 const API_BASE_URL = 'https://emailbot-f71m.onrender.com';
 
@@ -450,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add Gmail API status section to the UI
 function addGmailStatusSection() {
-    const container = document.querySelector('.container');
+    const container = document.querySelector('.main-content');
     
     // Create Gmail status section
     const gmailSection = document.createElement('div');
@@ -501,19 +499,19 @@ function addGmailStatusSection() {
         </div>
         
         <div id="authCodeSection" style="margin-top: 15px; display: none;">
-            <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." style="padding: 10px; border: none; border-radius: 6px; width: 70%; margin-right: 10px;">
+            <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." style="padding: 10px; border: none; border-radius: 6px; width: 70%; margin-right: 10px; color: black;">
             <button id="completeAuthBtn" style="padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 6px; cursor: pointer;">
                 ✅ Complete Setup
             </button>
         </div>
     `;
     
-    // Insert before contact management section
-    const contactSection = document.querySelector('h2');
-    if (contactSection) {
-        container.insertBefore(gmailSection, contactSection);
+    // Insert at the beginning of the main content (after welcome section)
+    const welcomeSection = container.querySelector('.welcome-section');
+    if (welcomeSection) {
+        welcomeSection.insertAdjacentElement('afterend', gmailSection);
     } else {
-        container.appendChild(gmailSection);
+        container.insertBefore(gmailSection, container.firstChild);
     }
     
     // Add event listeners
@@ -607,7 +605,4 @@ async function checkGmailStatus() {
             statusBadge.style.background = '#F44336';
         }
     }
-}
-
-// Export for potential module usage
-export { updateState, showToast, showModal } 
+} 
