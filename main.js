@@ -1,5 +1,8 @@
 import './style.css'
 
+// API Configuration
+const API_BASE_URL = 'https://emailbot-f71m.onrender.com';
+
 // Application State
 const state = {
   totalContacts: 0,
@@ -430,16 +433,181 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+  // Add Gmail status section first
+  addGmailStatusSection();
+  
   init()
   startRealTimeUpdates()
   
   console.log('🎉 Email Manager Pro is ready!')
+  console.log('📧 Gmail API integration loaded')
   console.log('💡 Try these keyboard shortcuts:')
   console.log('   Ctrl+I: Import CSV')
   console.log('   Ctrl+W: Focus URL input')
   console.log('   Ctrl+R: Refresh data')
   console.log('   Esc: Close modal')
 })
+
+// Add Gmail API status section to the UI
+function addGmailStatusSection() {
+    const container = document.querySelector('.container');
+    
+    // Create Gmail status section
+    const gmailSection = document.createElement('div');
+    gmailSection.className = 'gmail-status-section';
+    gmailSection.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    `;
+    
+    gmailSection.innerHTML = `
+        <h2 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
+            📧 Email Service Status
+            <span id="gmailStatusBadge" style="font-size: 14px; padding: 4px 8px; border-radius: 20px; background: rgba(255,255,255,0.2);">
+                Loading...
+            </span>
+        </h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #FFD700;">🥇 Gmail API (Primary)</h4>
+                <p style="margin: 5px 0; font-size: 14px;">Daily Limit: <strong>1 BILLION emails</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">Cost: <strong>FREE Forever</strong></p>
+                <p id="gmailStatus" style="margin: 5px 0; font-size: 14px;">Status: <span>Checking...</span></p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #C0C0C0;">🥈 SendGrid (Fallback)</h4>
+                <p style="margin: 5px 0; font-size: 14px;">Daily Limit: <strong>100 emails</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">Cost: <strong>Free Tier</strong></p>
+                <p style="margin: 5px 0; font-size: 14px;">Status: <span>Fallback Ready</span></p>
+            </div>
+        </div>
+        
+        <div id="gmailActions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="checkGmailStatus" style="padding: 10px 20px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
+                🔄 Refresh Status
+            </button>
+            <button id="setupGmailBtn" style="padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 6px; cursor: pointer; transition: all 0.3s; display: none;">
+                🚀 Setup Gmail API
+            </button>
+            <a id="gmailAuthLink" target="_blank" style="padding: 10px 20px; background: #FF5722; text-decoration: none; color: white; border-radius: 6px; transition: all 0.3s; display: none;">
+                🔐 Authorize Gmail
+            </a>
+        </div>
+        
+        <div id="authCodeSection" style="margin-top: 15px; display: none;">
+            <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." style="padding: 10px; border: none; border-radius: 6px; width: 70%; margin-right: 10px;">
+            <button id="completeAuthBtn" style="padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 6px; cursor: pointer;">
+                ✅ Complete Setup
+            </button>
+        </div>
+    `;
+    
+    // Insert before contact management section
+    const contactSection = document.querySelector('h2');
+    if (contactSection) {
+        container.insertBefore(gmailSection, contactSection);
+    } else {
+        container.appendChild(gmailSection);
+    }
+    
+    // Add event listeners
+    setupGmailEventListeners();
+    
+    // Load initial status
+    checkGmailStatus();
+}
+
+// Setup Gmail event listeners
+function setupGmailEventListeners() {
+    document.getElementById('checkGmailStatus').addEventListener('click', checkGmailStatus);
+    
+    document.getElementById('setupGmailBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/gmail/auth/start`);
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('gmailAuthLink').href = data.authUrl;
+                document.getElementById('gmailAuthLink').style.display = 'inline-block';
+                document.getElementById('authCodeSection').style.display = 'block';
+                
+                showToast('Click "Authorize Gmail" and copy the code when redirected!', 'info');
+            }
+        } catch (error) {
+            showToast('Error starting Gmail setup: ' + error.message, 'error');
+        }
+    });
+    
+    document.getElementById('completeAuthBtn').addEventListener('click', async () => {
+        const code = document.getElementById('authCodeInput').value.trim();
+        
+        if (!code) {
+            showToast('Please paste the authorization code', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/gmail/auth/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showToast('🎉 Gmail API setup complete! 1 billion emails/day activated!', 'success');
+                document.getElementById('authCodeSection').style.display = 'none';
+                document.getElementById('gmailAuthLink').style.display = 'none';
+                checkGmailStatus();
+            } else {
+                showToast('Setup failed: ' + data.error, 'error');
+            }
+        } catch (error) {
+            showToast('Error completing setup: ' + error.message, 'error');
+        }
+    });
+}
+
+// Check Gmail API status
+async function checkGmailStatus() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/gmail/status`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const gmail = data.gmail;
+            const statusBadge = document.getElementById('gmailStatusBadge');
+            const gmailStatus = document.getElementById('gmailStatus');
+            const setupBtn = document.getElementById('setupGmailBtn');
+            
+            if (gmail.authenticated) {
+                statusBadge.textContent = '✅ Active';
+                statusBadge.style.background = '#4CAF50';
+                gmailStatus.innerHTML = `Status: <span style="color: #4CAF50;">✅ Authenticated (${gmail.usage.dailyLimit.toLocaleString()} emails/day)</span>`;
+                setupBtn.style.display = 'none';
+            } else {
+                statusBadge.textContent = '⚠️ Setup Required';
+                statusBadge.style.background = '#FF5722';
+                gmailStatus.innerHTML = `Status: <span style="color: #FF5722;">❌ Not Configured</span>`;
+                setupBtn.style.display = 'inline-block';
+            }
+        }
+    } catch (error) {
+        console.error('Error checking Gmail status:', error);
+        const statusBadge = document.getElementById('gmailStatusBadge');
+        if (statusBadge) {
+            statusBadge.textContent = '❌ Error';
+            statusBadge.style.background = '#F44336';
+        }
+    }
+}
 
 // Export for potential module usage
 export { updateState, showToast, showModal } 
