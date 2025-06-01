@@ -7,30 +7,14 @@ services:
     branch: main
     rootDir: email-manager-web/scraper-engine
     plan: free
+    region: oregon
     envVars:
       - key: NODE_ENV
         value: production
       - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: true
+        value: "true"
       - key: PUPPETEER_EXECUTABLE_PATH
-        value: /usr/bin/chromium-browser
-      - key: LOG_LEVEL
-        value: info
-      - key: BROWSER_HEADLESS
-        value: true
-      - key: BROWSER_TIMEOUT
-        value: 30000
-      - key: CLUSTER_WORKERS
-        value: 1
-      - key: RATE_LIMIT_REQUESTS
-        value: 100
-      - key: RATE_LIMIT_WINDOW
-        value: 900000
-      - key: CORS_ORIGIN
-        value: https://email-scraper-pro.vercel.app
+        value: "/usr/bin/chromium-browser"
       - key: HOST
-        value: 0.0.0.0
-    buildCommand: npm install --omit=dev
-    startCommand: npm start
-    healthCheckPath: /health
-    region: oregon 
+        value: "0.0.0.0"
+    healthCheckPath: /health 

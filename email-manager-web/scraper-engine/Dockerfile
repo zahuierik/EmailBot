@@ -43,12 +43,12 @@ RUN addgroup -g 1001 -S nodejs && \
 # Switch to non-root user
 USER scraper
 
-# Expose port (Render.com will provide PORT env var dynamically)
-EXPOSE $PORT
+# Expose port 10000 (Render.com default port)
+EXPOSE 10000
 
-# Health check
+# Health check using PORT environment variable (defaults to 10000)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "const http = require('http'); http.get('http://localhost:' + (process.env.PORT || 3001) + '/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"
+  CMD node -e "const http = require('http'); const port = process.env.PORT || 10000; http.get('http://localhost:' + port + '/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1));"
 
 # Start the application
 CMD ["npm", "start"] 

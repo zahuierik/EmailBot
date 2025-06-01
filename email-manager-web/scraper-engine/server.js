@@ -48,7 +48,7 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
 } else {
   // Worker process
   const app = express();
-  const PORT = process.env.PORT || 3001;
+  const PORT = process.env.PORT || 10000; // Render.com default port is 10000
 
   // Security and performance middleware
   app.use(helmet());
@@ -102,7 +102,9 @@ if (cluster.isMaster && process.env.NODE_ENV === 'production') {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV,
-      port: process.env.PORT || 3001
+      port: PORT,
+      host: process.env.HOST || '0.0.0.0',
+      renderService: process.env.RENDER_SERVICE_NAME || 'local'
     });
   });
 
