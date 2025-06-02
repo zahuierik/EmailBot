@@ -1259,8 +1259,8 @@ function sendPersonalizedEmail(toEmail, toName) {
             
             <p style="font-size: 12px; color: #666; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
               If you're not interested in receiving these emails, please reply with "UNSUBSCRIBE" and I'll remove you from my list immediately.
-            </p>
-          </div>
+    </p>
+  </div>
         </body>
       </html>\`;
     

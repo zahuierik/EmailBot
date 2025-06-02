@@ -1,203 +1,116 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Manager Pro</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Manager - AI Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
+</head>
+<body>
     <div id="app">
-      <!-- Navigation -->
-      <nav class="navbar">
-        <div class="nav-container">
-          <div class="nav-brand">
-            <span class="material-icons">email</span>
-            <h1>Email Manager Pro</h1>
-          </div>
-          <button class="refresh-btn" onclick="refreshData()">
-            <span class="material-icons">refresh</span>
-          </button>
-        </div>
-      </nav>
+        <!-- Main Chat Interface -->
+        <main class="chat-container">
+            <!-- Messages Area -->
+            <div id="chatMessages" class="messages-area">
+                <!-- Chat messages will appear here -->
+            </div>
 
-      <!-- Main Content -->
-      <main class="main-content container">
-        <!-- Welcome Section -->
-        <section class="welcome-section">
-          <div class="welcome-card">
-            <div class="welcome-header">
-              <div class="icon-container">
-                <span class="material-icons">email</span>
-              </div>
-              <div class="welcome-text">
-                <h2>Welcome to Email Manager Pro</h2>
-                <p>Advanced email extraction and management system</p>
-              </div>
-            </div>
-            <div class="feature-chips">
-              <div class="chip">
-                <span class="material-icons">file_upload</span>
-                CSV Import
-              </div>
-              <div class="chip">
-                <span class="material-icons">web</span>
-                Web Scraping
-              </div>
-              <div class="chip">
-                <span class="material-icons">email</span>
-                Email Sending
-              </div>
-              <div class="chip">
-                <span class="material-icons">analytics</span>
-                Analytics
-              </div>
-              <div class="chip success">
-                <span class="material-icons">verified</span>
-                GDPR Compliant
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Quick Statistics -->
-        <section class="stats-section">
-          <h3>Quick Statistics</h3>
-          <div class="stats-grid">
-            <div class="stat-card primary">
-              <div class="stat-header">
-                <span class="material-icons">contacts</span>
-                <span class="stat-title">Total Contacts</span>
-              </div>
-              <div class="stat-value" id="totalContacts">0</div>
-            </div>
-            <div class="stat-card tertiary">
-              <div class="stat-header">
-                <span class="material-icons">mark_email_read</span>
-                <span class="stat-title">Valid Emails</span>
-              </div>
-              <div class="stat-value" id="validEmails">0</div>
-            </div>
-            <div class="stat-card secondary">
-              <div class="stat-header">
-                <span class="material-icons">send</span>
-                <span class="stat-title">Emails Sent Today</span>
-              </div>
-              <div class="stat-value" id="emailsSentToday">0</div>
-            </div>
-            <div class="stat-card outline">
-              <div class="stat-header">
-                <span class="material-icons">schedule</span>
-                <span class="stat-title">Daily Limit Remaining</span>
-              </div>
-              <div class="stat-value" id="dailyLimitRemaining">30</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Data Extraction Options -->
-        <section class="extraction-section">
-          <div class="card">
-            <h3>Data Extraction</h3>
-            <div class="extraction-buttons">
-              <button class="btn primary" onclick="showImportDemo()">
-                <span class="material-icons">file_upload</span>
-                Import CSV File
-              </button>
-              <button class="btn primary" onclick="showScrapingDemo()">
-                <span class="material-icons">web</span>
-                Web Scraping
-              </button>
-            </div>
-            <div class="url-input-container">
-              <div class="input-group">
-                <span class="material-icons">link</span>
-                <input type="text" id="urlInput" placeholder="Enter URL to scrape emails from..." />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Quick Actions -->
-        <section class="actions-section">
-          <div class="card">
-            <h3>Quick Actions</h3>
-            <div class="action-list">
-              <div class="action-item" onclick="simulateEmailSent()">
-                <div class="action-icon">
-                  <span class="material-icons">send</span>
+            <!-- Input Bar -->
+            <div class="input-bar">
+                <!-- AI Status Indicator -->
+                <div class="ai-status" id="aiStatus" title="AI Assistant Status">
+                    <span class="material-icons">smart_toy</span>
                 </div>
-                <div class="action-content">
-                  <div class="action-title">Send Test Email</div>
-                  <div class="action-subtitle">Send a test email to verify configuration</div>
+                
+                <!-- URL Input -->
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="urlInput" 
+                        class="url-input" 
+                        placeholder="Ask me anything, add emails, or enter a website URL to scrape..."
+                        onkeydown="handleInputKeydown(event)"
+                    />
                 </div>
-                <span class="material-icons">arrow_forward_ios</span>
-              </div>
-              <div class="divider"></div>
-              <div class="action-item" onclick="showConfigDemo()">
-                <div class="action-icon">
-                  <span class="material-icons">settings</span>
-                </div>
-                <div class="action-content">
-                  <div class="action-title">Email Configuration</div>
-                  <div class="action-subtitle">Configure SendGrid API settings</div>
-                </div>
-                <span class="material-icons">arrow_forward_ios</span>
-              </div>
+                
+                <!-- Send Button -->
+                <button class="action-btn send-btn" onclick="handleUserInput()" title="Send Message">
+                    <span class="material-icons">send</span>
+                </button>
             </div>
-          </div>
-        </section>
+        </main>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-          <div class="nav-item active" onclick="switchTab('home')">
-            <span class="material-icons">home</span>
-            <span>Home</span>
-          </div>
-          <div class="nav-item" onclick="switchTab('contacts')">
+        <!-- Contact Counter (Floating) -->
+        <div class="contact-counter" id="contactCounter" onclick="showContactsSummary()">
             <span class="material-icons">contacts</span>
-            <span>Contacts</span>
-          </div>
-          <div class="nav-item" onclick="switchTab('analytics')">
-            <span class="material-icons">analytics</span>
-            <span>Analytics</span>
-          </div>
-          <div class="nav-item" onclick="switchTab('settings')">
-            <span class="material-icons">settings</span>
-            <span>Settings</span>
-          </div>
-        </nav>
-      </main>
-
-      <!-- Modal Overlay -->
-      <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h4 id="modalTitle">Modal Title</h4>
-            <button class="close-btn" onclick="closeModal()">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-          <div class="modal-content" id="modalContent">
-            Modal content goes here
-          </div>
-          <div class="modal-actions">
-            <button class="btn secondary" onclick="closeModal()">Cancel</button>
-            <button class="btn primary" id="modalAction" onclick="closeModal()">OK</button>
-          </div>
+            <span id="contactCount">0</span>
         </div>
-      </div>
 
-      <!-- Toast Notification -->
-      <div id="toast" class="toast">
-        <span class="material-icons">check_circle</span>
-        <span id="toastMessage">Success message</span>
-      </div>
+        <!-- Settings Button (Floating) -->
+        <div class="settings-btn" id="settingsBtn" onclick="showGmailSetup()">
+            <span class="material-icons">settings</span>
+        </div>
+
+        <!-- Gmail Setup Modal -->
+        <div id="gmailSetupModal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>📧 Email Service Status & Setup</h3>
+                    <button class="close-btn" onclick="closeGmailSetup()">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div class="service-status">
+                        <div class="status-item">
+                            <span class="material-icons">email</span>
+                            <div>
+                                <strong>Gmail API</strong>
+                                <p id="gmailStatus">Not configured</p>
+                            </div>
+                            <span id="gmailStatusIcon" class="status-icon">❌</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="material-icons">send</span>
+                            <div>
+                                <strong>SendGrid Backup</strong>
+                                <p>Active (100 emails/day)</p>
+                            </div>
+                            <span class="status-icon">✅</span>
+                        </div>
+                    </div>
+
+                    <div class="gmail-setup">
+                        <h4>🚀 Setup Gmail API</h4>
+                        <p>Get unlimited email sending with Gmail API (1 billion emails/day)</p>
+                        
+                        <div class="setup-steps">
+                            <button id="authorizeBtn" class="btn primary" onclick="authorizeGmail()">
+                                🔐 Authorize Gmail
+                            </button>
+                            
+                            <div id="authCodeSection" style="display: none;">
+                                <label>Authorization Code:</label>
+                                <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." />
+                                <button class="btn primary" onclick="completeGmailSetup()">
+                                    ✅ Complete Setup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <span class="material-icons">check_circle</span>
+            <span id="toastMessage">Success message</span>
+        </div>
     </div>
-
+    
     <script src="main.js"></script>
-  </body>
+</body>
 </html> 

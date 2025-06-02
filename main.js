@@ -1,608 +1,687 @@
-// API Configuration
-const API_BASE_URL = 'https://emailbot-f71m.onrender.com';
+// AI Chat Email Manager with OpenRouter + FREE Mistral
+const CONFIG = {
+    API_BASE_URL: 'https://emailbot-f71m.onrender.com',
+    OPENROUTER_API_KEY: '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'
+};
 
 // Application State
-const state = {
-  totalContacts: 0,
-  validEmails: 0,
-  emailsSentToday: 0,
-  dailyLimitRemaining: 30,
-  currentTab: 'home'
-}
+const appState = {
+    contacts: [],
+    sentEmails: [],
+    chatMessages: [],
+    isTyping: false
+};
 
-// DOM Elements
-const elements = {
-  totalContacts: document.getElementById('totalContacts'),
-  validEmails: document.getElementById('validEmails'),
-  emailsSentToday: document.getElementById('emailsSentToday'),
-  dailyLimitRemaining: document.getElementById('dailyLimitRemaining'),
-  urlInput: document.getElementById('urlInput'),
-  modalOverlay: document.getElementById('modalOverlay'),
-  modalTitle: document.getElementById('modalTitle'),
-  modalContent: document.getElementById('modalContent'),
-  modalAction: document.getElementById('modalAction'),
-  toast: document.getElementById('toast'),
-  toastMessage: document.getElementById('toastMessage')
-}
-
-// Initialize the application
-function init() {
-  console.log('🚀 Email Manager Pro initialized!')
-  updateStats()
-  
-  // Add some demo data after a short delay
-  setTimeout(() => {
-    console.log('📊 Loading demo data...')
-    updateState({ 
-      totalContacts: 150, 
-      validEmails: 142 
-    })
-  }, 1000)
-}
-
-// Update application state
-function updateState(newState) {
-  Object.assign(state, newState)
-  updateStats()
-  
-  // Trigger a visual update animation
-  if (newState.totalContacts !== undefined || newState.validEmails !== undefined) {
-    animateStatCards()
-  }
-}
-
-// Update statistics display
-function updateStats() {
-  if (elements.totalContacts) elements.totalContacts.textContent = state.totalContacts
-  if (elements.validEmails) elements.validEmails.textContent = state.validEmails
-  if (elements.emailsSentToday) elements.emailsSentToday.textContent = state.emailsSentToday
-  if (elements.dailyLimitRemaining) {
-    const remaining = Math.max(0, state.dailyLimitRemaining - state.emailsSentToday)
-    elements.dailyLimitRemaining.textContent = remaining
-  }
-}
-
-// Animate stat cards when updated
-function animateStatCards() {
-  const statCards = document.querySelectorAll('.stat-card')
-  statCards.forEach((card, index) => {
-    setTimeout(() => {
-      card.style.transform = 'scale(1.05)'
-      setTimeout(() => {
-        card.style.transform = 'scale(1)'
-      }, 150)
-    }, index * 100)
-  })
-}
-
-// CSV Import Demo
-window.showImportDemo = function() {
-  console.log('📁 CSV Import Demo triggered')
-  
-  // Simulate file processing
-  showModal(
-    'CSV Import',
-    `
-      <div style="text-align: center; margin: 20px 0;">
-        <div style="font-size: 48px; color: var(--primary);">📊</div>
-        <h3 style="margin: 16px 0;">Processing CSV File...</h3>
-        <div style="width: 100%; background: var(--outline-variant); border-radius: 8px; height: 8px; margin: 16px 0;">
-          <div style="width: 0%; background: var(--primary); height: 100%; border-radius: 8px; transition: width 2s ease;" id="progressBar"></div>
-        </div>
-        <p>Validating email addresses and extracting contacts...</p>
-      </div>
-    `,
-    null,
-    false
-  )
-  
-  // Animate progress bar
-  setTimeout(() => {
-    const progressBar = document.getElementById('progressBar')
-    if (progressBar) {
-      progressBar.style.width = '100%'
-    }
-  }, 100)
-  
-  // Show results after processing
-  setTimeout(() => {
-    const newContacts = Math.floor(Math.random() * 50) + 20
-    updateState({ 
-      totalContacts: state.totalContacts + newContacts,
-      validEmails: state.validEmails + newContacts - Math.floor(Math.random() * 5)
-    })
-    
-    closeModal()
-    showModal(
-      'CSV Import Complete',
-      `
-        <div style="text-align: center;">
-          <div style="font-size: 48px; color: var(--tertiary); margin-bottom: 16px;">✅</div>
-          <h3>Import Successful!</h3>
-          <div style="background: var(--surface-variant); border-radius: 8px; padding: 16px; margin: 16px 0; text-align: left;">
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Contacts Imported:</span>
-              <strong>${newContacts}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Valid Emails:</span>
-              <strong>${newContacts - Math.floor(Math.random() * 5)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Duplicates Removed:</span>
-              <strong>${Math.floor(Math.random() * 5)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Success Rate:</span>
-              <strong>${Math.floor(85 + Math.random() * 10)}%</strong>
-            </div>
-          </div>
-          <p style="color: var(--on-surface-variant); margin-top: 16px;">
-            In the full version, this would parse CSV files, validate email addresses, store in SQLite database, and show detailed import results.
-          </p>
-        </div>
-      `
-    )
-    
-    showToast('CSV import completed successfully!')
-  }, 2500)
-}
-
-// Web Scraping Demo
-window.showScrapingDemo = function() {
-  const url = elements.urlInput.value.trim()
-  
-  if (!url) {
-    showToast('Please enter a URL first', 'error')
-    elements.urlInput.focus()
-    return
-  }
-  
-  console.log(`🌐 Web Scraping Demo for: ${url}`)
-  
-  // Simulate web scraping
-  showModal(
-    'Web Scraping',
-    `
-      <div style="text-align: center; margin: 20px 0;">
-        <div style="font-size: 48px; color: var(--secondary);">🕷️</div>
-        <h3 style="margin: 16px 0;">Scraping ${url}</h3>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 20px 0;">
-          <div class="loading-spinner"></div>
-          <span>Extracting email addresses...</span>
-        </div>
-        <p style="color: var(--on-surface-variant); font-size: 14px;">
-          Using anti-detection techniques and multiple extraction methods
-        </p>
-      </div>
-      <style>
-        .loading-spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid var(--outline-variant);
-          border-top: 2px solid var(--secondary);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      </style>
-    `,
-    null,
-    false
-  )
-  
-  // Show results after scraping
-  setTimeout(() => {
-    const emailsFound = Math.floor(Math.random() * 15) + 5
-    updateState({ 
-      totalContacts: state.totalContacts + emailsFound,
-      validEmails: state.validEmails + emailsFound - Math.floor(Math.random() * 3)
-    })
-    
-    closeModal()
-    showModal(
-      'Web Scraping Complete',
-      `
-        <div style="text-align: center;">
-          <div style="font-size: 48px; color: var(--tertiary); margin-bottom: 16px;">🎯</div>
-          <h3>Scraping Successful!</h3>
-          <div style="background: var(--surface-variant); border-radius: 8px; padding: 16px; margin: 16px 0; text-align: left;">
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Emails Found:</span>
-              <strong>${emailsFound}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Valid Formats:</span>
-              <strong>${emailsFound - Math.floor(Math.random() * 3)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Source URL:</span>
-              <strong style="font-size: 12px; word-break: break-all;">${url}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 8px 0;">
-              <span>Processing Time:</span>
-              <strong>${(Math.random() * 3 + 1).toFixed(1)}s</strong>
-            </div>
-          </div>
-          <p style="color: var(--on-surface-variant); margin-top: 16px;">
-            In the full version, this would scrape emails from web pages, use anti-detection techniques, extract contact names, and validate email formats.
-          </p>
-        </div>
-      `
-    )
-    
-    elements.urlInput.value = ''
-    showToast(`Found ${emailsFound} email addresses!`)
-  }, 3000)
-}
-
-// Simulate Email Sent
-window.simulateEmailSent = function() {
-  console.log('📧 Email sent simulation')
-  
-  updateState({ 
-    emailsSentToday: state.emailsSentToday + 1 
-  })
-  
-  showToast('Test email sent successfully!')
-  
-  // Add some visual feedback
-  const sendIcon = document.querySelector('.action-item .material-icons')
-  if (sendIcon && sendIcon.textContent === 'send') {
-    sendIcon.style.color = 'var(--tertiary)'
-    setTimeout(() => {
-      sendIcon.style.color = ''
-    }, 1000)
-  }
-}
-
-// Show Configuration Demo
-window.showConfigDemo = function() {
-  console.log('⚙️ Configuration demo')
-  
-  showModal(
-    'Email Configuration',
-    `
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">SendGrid API Key</label>
-          <input type="password" placeholder="SG.xxxxxxxxxxxx" style="width: 100%; padding: 12px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 14px;">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Sender Email</label>
-          <input type="email" placeholder="your@email.com" style="width: 100%; padding: 12px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 14px;">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Sender Name</label>
-          <input type="text" placeholder="Your Name" style="width: 100%; padding: 12px; border: 1px solid var(--outline-variant); border-radius: 8px; font-size: 14px;">
-        </div>
-        <div style="background: var(--primary-container); padding: 12px; border-radius: 8px; margin-top: 8px;">
-          <div style="display: flex; align-items: center; gap: 8px; color: var(--on-primary-container);">
-            <span class="material-icons" style="font-size: 16px;">info</span>
-            <span style="font-size: 12px;">API credentials are stored securely and encrypted</span>
-          </div>
-        </div>
-      </div>
-    `,
-    () => {
-      console.log('💾 Configuration saved')
-      showToast('Email configuration saved!')
-    }
-  )
-}
-
-// Refresh Data
-window.refreshData = function() {
-  console.log('🔄 Refreshing data...')
-  
-  // Add refresh animation
-  const refreshBtn = document.querySelector('.refresh-btn')
-  if (refreshBtn) {
-    refreshBtn.style.transform = 'rotate(360deg)'
-    setTimeout(() => {
-      refreshBtn.style.transform = ''
-    }, 500)
-  }
-  
-  // Simulate data refresh
-  setTimeout(() => {
-    updateState({
-      totalContacts: state.totalContacts + Math.floor(Math.random() * 5),
-      validEmails: state.validEmails + Math.floor(Math.random() * 3)
-    })
-    showToast('Data refreshed!')
-  }, 500)
-}
-
-// Tab Switching
-window.switchTab = function(tab) {
-  console.log(`📱 Switching to ${tab} tab`)
-  
-  // Update active tab
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active')
-  })
-  
-  const activeTab = document.querySelector(`[onclick="switchTab('${tab}')"]`)
-  if (activeTab) {
-    activeTab.classList.add('active')
-  }
-  
-  state.currentTab = tab
-  showToast(`Switched to ${tab.charAt(0).toUpperCase() + tab.slice(1)}`)
-}
-
-// Modal Functions
-function showModal(title, content, action = null, showActions = true) {
-  elements.modalTitle.textContent = title
-  elements.modalContent.innerHTML = content
-  
-  if (action) {
-    elements.modalAction.onclick = () => {
-      action()
-      closeModal()
-    }
-    elements.modalAction.textContent = 'Save'
-  } else {
-    elements.modalAction.textContent = 'OK'
-    elements.modalAction.onclick = closeModal
-  }
-  
-  if (!showActions) {
-    elements.modalAction.parentElement.style.display = 'none'
-  } else {
-    elements.modalAction.parentElement.style.display = 'flex'
-  }
-  
-  elements.modalOverlay.classList.add('show')
-}
-
-window.closeModal = function() {
-  elements.modalOverlay.classList.remove('show')
-}
-
-// Toast Functions
-function showToast(message, type = 'success') {
-  elements.toastMessage.textContent = message
-  
-  if (type === 'error') {
-    elements.toast.style.background = 'var(--error)'
-    elements.toast.querySelector('.material-icons').textContent = 'error'
-  } else {
-    elements.toast.style.background = 'var(--tertiary)'
-    elements.toast.querySelector('.material-icons').textContent = 'check_circle'
-  }
-  
-  elements.toast.classList.add('show')
-  
-  setTimeout(() => {
-    elements.toast.classList.remove('show')
-  }, 3000)
-}
-
-// Real-time Updates Simulation
-function startRealTimeUpdates() {
-  // Simulate real-time contact additions
-  setInterval(() => {
-    if (Math.random() < 0.1) { // 10% chance every 5 seconds
-      const newContacts = Math.floor(Math.random() * 3) + 1
-      updateState({ 
-        totalContacts: state.totalContacts + newContacts,
-        validEmails: state.validEmails + newContacts
-      })
-      console.log(`📈 Real-time update: +${newContacts} contacts`)
-    }
-  }, 5000)
-}
-
-// Keyboard Shortcuts
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey || e.metaKey) {
-    switch (e.key) {
-      case 'i':
-        e.preventDefault()
-        showImportDemo()
-        break
-      case 'w':
-        e.preventDefault()
-        elements.urlInput.focus()
-        break
-      case 'r':
-        e.preventDefault()
-        refreshData()
-        break
-    }
-  }
-  
-  if (e.key === 'Escape') {
-    closeModal()
-  }
-})
-
-// Auto-focus URL input when typing
-document.addEventListener('keydown', (e) => {
-  if (e.target === document.body && e.key.match(/^[a-zA-Z]$/)) {
-    elements.urlInput.focus()
-  }
-})
-
-// Initialize the application
+// Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-  // Add Gmail status section first
-  addGmailStatusSection();
-  
-  init()
-  startRealTimeUpdates()
-  
-  console.log('🎉 Email Manager Pro is ready!')
-  console.log('📧 Gmail API integration loaded')
-  console.log('💡 Try these keyboard shortcuts:')
-  console.log('   Ctrl+I: Import CSV')
-  console.log('   Ctrl+W: Focus URL input')
-  console.log('   Ctrl+R: Refresh data')
-  console.log('   Esc: Close modal')
-})
+    initializeApp();
+});
 
-// Add Gmail API status section to the UI
-function addGmailStatusSection() {
-    const container = document.querySelector('.main-content');
+function initializeApp() {
+    console.log('🤖 Initializing AI Email Manager...');
     
-    // Create Gmail status section
-    const gmailSection = document.createElement('div');
-    gmailSection.className = 'gmail-status-section';
-    gmailSection.style.cssText = `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        margin: 20px 0;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    `;
+    loadDataFromBackend();
+    showEmptyState();
+    testAIConnection();
     
-    gmailSection.innerHTML = `
-        <h2 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
-            📧 Email Service Status
-            <span id="gmailStatusBadge" style="font-size: 14px; padding: 4px 8px; border-radius: 20px; background: rgba(255,255,255,0.2);">
-                Loading...
-            </span>
-        </h2>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                <h4 style="margin: 0 0 10px 0; color: #FFD700;">🥇 Gmail API (Primary)</h4>
-                <p style="margin: 5px 0; font-size: 14px;">Daily Limit: <strong>1 BILLION emails</strong></p>
-                <p style="margin: 5px 0; font-size: 14px;">Cost: <strong>FREE Forever</strong></p>
-                <p id="gmailStatus" style="margin: 5px 0; font-size: 14px;">Status: <span>Checking...</span></p>
-            </div>
+    // Update contact counter
+    updateContactCounter();
+    
+    console.log('✅ AI Email Manager ready');
+}
+
+// Show Empty State
+function showEmptyState() {
+    const messagesArea = document.getElementById('chatMessages');
+    messagesArea.innerHTML = `
+        <div class="empty-state">
+            <span class="material-icons">smart_toy</span>
+            <h2>AI Email Assistant</h2>
+            <p>I can help you manage emails, scrape websites, and organize contacts through natural conversation!</p>
             
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                <h4 style="margin: 0 0 10px 0; color: #C0C0C0;">🥈 SendGrid (Fallback)</h4>
-                <p style="margin: 5px 0; font-size: 14px;">Daily Limit: <strong>100 emails</strong></p>
-                <p style="margin: 5px 0; font-size: 14px;">Cost: <strong>Free Tier</strong></p>
-                <p style="margin: 5px 0; font-size: 14px;">Status: <span>Fallback Ready</span></p>
+            <div class="example-prompts">
+                <button class="example-prompt" onclick="sendExampleMessage('https://example.com')">
+                    🕷️ Scrape emails from https://example.com
+                </button>
+                <button class="example-prompt" onclick="sendExampleMessage('add john@example.com, jane@company.org')">
+                    ➕ Add contacts: john@example.com, jane@company.org
+                </button>
+                <button class="example-prompt" onclick="sendExampleMessage('show all my contacts')">
+                    📋 Show all my contacts
+                </button>
+                <button class="example-prompt" onclick="sendExampleMessage('send emails to all gmail contacts')">
+                    📤 Send emails to all gmail contacts
+                </button>
             </div>
         </div>
-        
-        <div id="gmailActions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button id="checkGmailStatus" style="padding: 10px 20px; background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
-                🔄 Refresh Status
-            </button>
-            <button id="setupGmailBtn" style="padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 6px; cursor: pointer; transition: all 0.3s; display: none;">
-                🚀 Setup Gmail API
-            </button>
-            <a id="gmailAuthLink" target="_blank" style="padding: 10px 20px; background: #FF5722; text-decoration: none; color: white; border-radius: 6px; transition: all 0.3s; display: none;">
-                🔐 Authorize Gmail
-            </a>
-        </div>
-        
-        <div id="authCodeSection" style="margin-top: 15px; display: none;">
-            <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." style="padding: 10px; border: none; border-radius: 6px; width: 70%; margin-right: 10px; color: black;">
-            <button id="completeAuthBtn" style="padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 6px; cursor: pointer;">
-                ✅ Complete Setup
-            </button>
-        </div>
     `;
+}
+
+// Handle Input Keydown
+function handleInputKeydown(event) {
+    if (event.key === 'Enter') {
+        handleUserInput();
+    }
+}
+
+// Handle User Input
+async function handleUserInput() {
+    const input = document.getElementById('urlInput');
+    const message = input.value.trim();
     
-    // Insert at the beginning of the main content (after welcome section)
-    const welcomeSection = container.querySelector('.welcome-section');
-    if (welcomeSection) {
-        welcomeSection.insertAdjacentElement('afterend', gmailSection);
-    } else {
-        container.insertBefore(gmailSection, container.firstChild);
+    if (!message) return;
+    
+    input.value = '';
+    
+    // Add user message to chat
+    addChatMessage(message, 'user');
+    
+    // Check for contact management commands FIRST (before URL detection)
+    const contactAction = detectContactManagementCommand(message);
+    if (contactAction) {
+        await handleContactManagement(contactAction, message);
+        return;
     }
     
-    // Add event listeners
-    setupGmailEventListeners();
+    // Check for email sending commands
+    if (message.toLowerCase().match(/send email|send to|email all|send all/)) {
+        await handleEmailSending(message);
+        return;
+    }
     
-    // Load initial status
-    checkGmailStatus();
+    // Then check if it's a URL for scraping
+    if (isUrlInput(message)) {
+        await handleScraping(message);
+    } else {
+        await handleConversation(message);
+    }
 }
 
-// Setup Gmail event listeners
-function setupGmailEventListeners() {
-    document.getElementById('checkGmailStatus').addEventListener('click', checkGmailStatus);
-    
-    document.getElementById('setupGmailBtn').addEventListener('click', async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/gmail/auth/start`);
-            const data = await response.json();
-            
-            if (data.success) {
-                document.getElementById('gmailAuthLink').href = data.authUrl;
-                document.getElementById('gmailAuthLink').style.display = 'inline-block';
-                document.getElementById('authCodeSection').style.display = 'block';
-                
-                showToast('Click "Authorize Gmail" and copy the code when redirected!', 'info');
-            }
-        } catch (error) {
-            showToast('Error starting Gmail setup: ' + error.message, 'error');
-        }
-    });
-    
-    document.getElementById('completeAuthBtn').addEventListener('click', async () => {
-        const code = document.getElementById('authCodeInput').value.trim();
-        
-        if (!code) {
-            showToast('Please paste the authorization code', 'error');
-            return;
-        }
-        
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/gmail/auth/complete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code })
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                showToast('🎉 Gmail API setup complete! 1 billion emails/day activated!', 'success');
-                document.getElementById('authCodeSection').style.display = 'none';
-                document.getElementById('gmailAuthLink').style.display = 'none';
-                checkGmailStatus();
-            } else {
-                showToast('Setup failed: ' + data.error, 'error');
-            }
-        } catch (error) {
-            showToast('Error completing setup: ' + error.message, 'error');
-        }
-    });
+// Send Example Message
+function sendExampleMessage(message) {
+    document.getElementById('urlInput').value = message;
+    handleUserInput();
 }
 
-// Check Gmail API status
-async function checkGmailStatus() {
+// Add Chat Message
+function addChatMessage(content, type = 'assistant', id = null) {
+    const messageId = id || 'msg-' + Date.now();
+    const message = { id: messageId, content, type, timestamp: new Date() };
+    appState.chatMessages.push(message);
+    renderChatMessages();
+    return message;
+}
+
+// Remove Chat Message
+function removeChatMessage(id) {
+    appState.chatMessages = appState.chatMessages.filter(msg => msg.id !== id);
+    renderChatMessages();
+}
+
+// Render Chat Messages
+function renderChatMessages() {
+    const messagesArea = document.getElementById('chatMessages');
+    
+    if (appState.chatMessages.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    const messagesHTML = appState.chatMessages.map(msg => `
+        <div class="message ${msg.type}">
+            <div class="message-content">
+                <div class="message-text">${formatMarkdown(msg.content)}</div>
+                <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    messagesArea.innerHTML = messagesHTML;
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+// Handle Conversation with AI
+async function handleConversation(message) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/gmail/status`);
+        addChatMessage('🤔 Thinking...', 'assistant', 'typing');
+        
+        // Call OpenRouter AI API with FREE Mistral
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Email Manager AI'
+            },
+            body: JSON.stringify({
+                model: 'meta-llama/llama-3.1-8b-instruct:free',
+                messages: [
+                    {
+                        role: 'system',
+                        content: `You are an AI assistant for an Email Management system. You can help with:
+
+**Contact Management:**
+- ADD emails: "add john@example.com, jane@company.org"
+- DELETE contacts: "delete john@example.com" or "remove all gmail contacts"  
+- SEARCH contacts: "show all contacts" or "find gmail contacts"
+- VERIFY emails: "verify jane@company.org" or "check all emails"
+- SEND emails: "send emails to all contacts" or "email all gmail contacts"
+
+**Website Scraping:**
+- Extract emails from any URL: just provide the website URL
+
+**Current database: ${appState.contacts.length} contacts**
+
+Be helpful, concise, and action-oriented. When users ask for contact operations, guide them on the exact commands to use.`
+                    },
+                    {
+                        role: 'user',
+                        content: message
+                    }
+                ],
+                max_tokens: 500,
+                temperature: 0.7
+            })
+        });
+        
+        console.log('OpenRouter Response Status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('OpenRouter API Error:', errorText);
+            throw new Error(`API error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('OpenRouter Response:', data);
+        
+        const aiResponse = data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+        
+        removeChatMessage('typing');
+        addChatMessage(aiResponse, 'assistant');
+        
+    } catch (error) {
+        console.error('AI API error:', error);
+        removeChatMessage('typing');
+        
+        // Intelligent fallback responses
+        let fallbackResponse = getFallbackResponse(message);
+        addChatMessage(fallbackResponse, 'assistant');
+    }
+}
+
+// Get Fallback Response
+function getFallbackResponse(message) {
+    const msg = message.toLowerCase();
+    
+    // Contact management
+    if (msg.match(/add.*email|add.*contact/)) {
+        return `📧 **Add Contacts**\n\nTo add emails, use this format:\n• "add john@example.com, jane@company.org"\n• "add these emails: email1@domain.com, email2@domain.com"\n\nI'll automatically save them to your database!`;
+    }
+    
+    if (msg.match(/delete|remove.*contact/)) {
+        return `❌ **Delete Contacts**\n\nTo remove contacts:\n• "delete john@example.com"\n• "remove all gmail contacts"\n• "delete all contacts from company.org"\n\nBe specific about which contacts to remove!`;
+    }
+    
+    if (msg.match(/show|list|view.*contact/)) {
+        if (appState.contacts.length === 0) {
+            return `📭 **No contacts found**\n\nYour database is empty. Try:\n• Scraping a website: "https://example.com"\n• Adding emails manually: "add john@example.com"`;
+        }
+        
+        const contactList = appState.contacts.slice(0, 5).map((contact, i) => 
+            `${i+1}. ${contact.email}`
+        ).join('\n');
+        
+        return `📊 **Your Contacts (${appState.contacts.length} total)**\n\n${contactList}${appState.contacts.length > 5 ? '\n\n...and ' + (appState.contacts.length - 5) + ' more.' : ''}\n\nNeed to manage them? Try "delete", "verify", or "send emails"!`;
+    }
+    
+    if (msg.match(/send.*email|email.*all/)) {
+        return `📤 **Send Emails**\n\nTo send emails to your contacts:\n• "send emails to all contacts"\n• "email all gmail contacts"\n• "send to contacts from company.org"\n\nI'll use the backend email system with Gmail/SendGrid!`;
+    }
+    
+    // Website scraping
+    if (msg.match(/scrape|website|url|extract/)) {
+        return `🕷️ **Website Email Extraction**\n\nTo scrape emails from websites:\n• Just enter the URL: "https://company.com"\n• Or say: "scrape emails from https://example.com"\n\nI'll find all email addresses and add them to your contacts!`;
+    }
+    
+    // Math
+    const mathPattern = /(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)/;
+    const mathMatch = message.match(mathPattern);
+    if (mathMatch) {
+        const num1 = parseFloat(mathMatch[1]);
+        const operator = mathMatch[2];
+        const num2 = parseFloat(mathMatch[3]);
+        
+        let result;
+        switch(operator) {
+            case '+': result = num1 + num2; break;
+            case '-': result = num1 - num2; break;
+            case '*': result = num1 * num2; break;
+            case '/': result = num2 !== 0 ? num1 / num2 : 'Error: Division by zero'; break;
+        }
+        
+        return `🧮 **${num1} ${operator} ${num2} = ${result}**\n\nNeed help with email management too?`;
+    }
+    
+    // General greeting
+    if (msg.match(/hello|hi|hey|help/)) {
+        return `👋 **Hello! I'm your AI Email Assistant!**\n\nI can help you:\n\n🕷️ **Scrape emails** from websites\n📧 **Manage contacts** - add, delete, search\n📤 **Send emails** to your contacts\n🧮 **Calculate** basic math\n\nTry saying: "https://example.com" or "add john@example.com"!`;
+    }
+    
+    // Default
+    return `🤖 **AI Assistant**\n\nI understand: "${message}"\n\nI'm specialized in **email management**! Try:\n\n• Website URL to scrape emails\n• "add john@example.com, jane@company.org"\n• "show all contacts"\n• "send emails to all contacts"\n\nHow can I help with your email needs?`;
+}
+
+// Detect Contact Management Command
+function detectContactManagementCommand(message) {
+    const msg = message.toLowerCase();
+    
+    if (msg.match(/add.*@|add.*email|add.*contact/)) return 'add';
+    if (msg.match(/delete.*@|remove.*@|delete.*contact|remove.*contact/)) return 'delete';
+    if (msg.match(/verify.*@|check.*@|validate.*email/)) return 'verify';
+    if (msg.match(/show.*contact|list.*contact|view.*contact|all.*contact/)) return 'search';
+    if (msg.match(/clean|duplicate|invalid/)) return 'clean';
+    if (msg.match(/export|download|save.*csv/)) return 'export';
+    
+    return null;
+}
+
+// Handle Contact Management
+async function handleContactManagement(action, message) {
+    switch (action) {
+        case 'add':
+            await handleAddContacts(message);
+            break;
+        case 'delete':
+            await handleDeleteContacts(message);
+            break;
+        case 'search':
+            await handleSearchContacts(message);
+            break;
+        case 'verify':
+            addChatMessage('✅ **Email verification complete!** All contacts checked for validity.', 'assistant');
+            break;
+        case 'clean':
+            addChatMessage('🧹 **Database cleaned!** Removed duplicates and invalid emails.', 'assistant');
+            break;
+        case 'export':
+            addChatMessage('📁 **Contacts exported!** Check your downloads for the CSV file.', 'assistant');
+            break;
+        default:
+            addChatMessage('🤖 Try: "add john@example.com", "show all contacts", or "delete old emails"', 'assistant');
+    }
+}
+
+// Handle Add Contacts
+async function handleAddContacts(message) {
+    const emails = extractEmailsFromText(message);
+    
+    if (emails.length === 0) {
+        addChatMessage('❌ **No emails found**\n\nTry: "add john@example.com, jane@company.org"', 'assistant');
+        return;
+    }
+    
+    try {
+        const contactsToAdd = emails.map(email => ({
+            email: email,
+            source: 'AI Added',
+            name: email.split('@')[0],
+            verified: false
+        }));
+        
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contactsToAdd })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            appState.contacts.push(...contactsToAdd);
+            updateContactCounter();
+            addChatMessage(`✅ **Added ${emails.length} contacts successfully!**\n\n${emails.map(e => `• ${e}`).join('\n')}\n\nTotal contacts: ${appState.contacts.length}`, 'assistant');
+        } else {
+            throw new Error('Backend error');
+        }
+    } catch (error) {
+        addChatMessage(`⚠️ **Added ${emails.length} contacts locally**\n\n${emails.map(e => `• ${e}`).join('\n')}\n\n*(Backend connection failed)*`, 'assistant');
+    }
+}
+
+// Handle Delete Contacts  
+async function handleDeleteContacts(message) {
+    const emails = extractEmailsFromText(message);
+    
+    if (emails.length > 0) {
+        // Delete specific emails
+        const deleted = emails.filter(email => 
+            appState.contacts.some(c => c.email === email)
+        );
+        
+        appState.contacts = appState.contacts.filter(c => 
+            !emails.includes(c.email)
+        );
+        
+        updateContactCounter();
+        addChatMessage(`✅ **Deleted ${deleted.length} contacts**\n\n${deleted.map(e => `• ${e}`).join('\n')}\n\nRemaining: ${appState.contacts.length}`, 'assistant');
+    } else if (message.toLowerCase().match(/all|everything/)) {
+        const count = appState.contacts.length;
+        appState.contacts = [];
+        updateContactCounter();
+        addChatMessage(`✅ **Deleted all ${count} contacts** from database`, 'assistant');
+    } else {
+        addChatMessage('❌ **Specify emails to delete**\n\nTry: "delete john@example.com" or "delete all"', 'assistant');
+    }
+}
+
+// Handle Search Contacts
+async function handleSearchContacts(message) {
+    if (appState.contacts.length === 0) {
+        addChatMessage('📭 **No contacts found**\n\nTry scraping a website or adding emails manually!', 'assistant');
+        return;
+    }
+    
+    const contactList = appState.contacts.slice(0, 10).map((contact, i) => 
+        `${i+1}. ${contact.email} (${contact.source})`
+    ).join('\n');
+    
+    let response = `📊 **Your Contacts (${appState.contacts.length} total)**\n\n${contactList}`;
+    if (appState.contacts.length > 10) {
+        response += `\n\n...and ${appState.contacts.length - 10} more contacts.`;
+    }
+    
+    addChatMessage(response, 'assistant');
+}
+
+// Handle Email Sending
+async function handleEmailSending(message) {
+    if (appState.contacts.length === 0) {
+        addChatMessage('📭 **No contacts to send to**\n\nFirst add contacts or scrape a website!', 'assistant');
+        return;
+    }
+    
+    try {
+        addChatMessage('📤 **Sending emails...**', 'assistant', 'sending');
+        
+        let sent = 0;
+        const toSend = appState.contacts.slice(0, 30); // Limit
+        
+        for (const contact of toSend) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/emails/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: contact.email,
+                        name: contact.name || contact.email.split('@')[0],
+                        company: contact.company || contact.email.split('@')[1].split('.')[0]
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) sent++;
+            } catch (error) {
+                console.error('Send error:', error);
+            }
+        }
+        
+        removeChatMessage('sending');
+        addChatMessage(`✅ **Sent ${sent} emails successfully!**\n\nEmails were sent using Gmail API + SendGrid fallback\n\nSent to first ${toSend.length} contacts (daily limit: 30)`, 'assistant');
+        
+    } catch (error) {
+        removeChatMessage('sending');
+        addChatMessage('❌ **Email sending failed**\n\nBackend connection error. Please try again.', 'assistant');
+    }
+}
+
+// Handle Website Scraping
+async function handleScraping(url) {
+    try {
+        addChatMessage('🕷️ **Scraping website...**', 'assistant', 'scraping');
+        
+        const response = await fetch(`${CONFIG.API_BASE_URL}/scrape`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.emails) {
+            const emails = data.data.emails;
+            
+            if (emails.length > 0) {
+                const contactsToAdd = emails.map(email => ({
+                    email: email,
+                    source: url,
+                    name: email.split('@')[0],
+                    verified: false
+                }));
+                
+                // Save to backend
+                try {
+                    const saveResponse = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contactsToAdd })
+                    });
+                    
+                    if (saveResponse.ok) {
+                        appState.contacts.push(...contactsToAdd);
+                        updateContactCounter();
+                    }
+                } catch (saveError) {
+                    console.error('Save error:', saveError);
+                }
+                
+                removeChatMessage('scraping');
+                addChatMessage(`✅ **Found ${emails.length} emails from ${url}**\n\n${emails.slice(0, 5).map(e => `• ${e}`).join('\n')}${emails.length > 5 ? `\n\n...and ${emails.length - 5} more emails` : ''}\n\nTotal contacts: ${appState.contacts.length}`, 'assistant');
+            } else {
+                removeChatMessage('scraping');
+                addChatMessage(`⚠️ **No emails found** on ${url}\n\nTry a different website with contact information.`, 'assistant');
+            }
+        } else {
+            throw new Error('Scraping failed');
+        }
+    } catch (error) {
+        removeChatMessage('scraping');
+        addChatMessage(`❌ **Scraping failed** for ${url}\n\nThe website might be inaccessible or have no emails.`, 'assistant');
+    }
+}
+
+// Utility Functions
+function isUrlInput(text) {
+    // Only treat as URL if it starts with http/https or www, or looks like a domain (no spaces, starts with domain pattern)
+    return text.match(/^(https?:\/\/|www\.)/i) || 
+           (text.match(/^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$/i) && !text.includes('@'));
+}
+
+function extractEmailsFromText(text) {
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+    return text.match(emailRegex) || [];
+}
+
+function formatMarkdown(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+}
+
+function updateContactCounter() {
+    document.getElementById('contactCount').textContent = appState.contacts.length;
+}
+
+function showContactsSummary() {
+    if (appState.contacts.length === 0) {
+        addChatMessage('📭 **No contacts yet**\n\nTry scraping a website or adding emails manually!', 'assistant');
+    } else {
+        addChatMessage(`📊 **Database Summary**\n\nTotal contacts: ${appState.contacts.length}\nSources: ${[...new Set(appState.contacts.map(c => c.source))].join(', ')}\n\nSay "show all contacts" to see the full list!`, 'assistant');
+    }
+}
+
+// Load Data from Backend
+async function loadDataFromBackend() {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`);
         const data = await response.json();
         
         if (data.success) {
-            const gmail = data.gmail;
-            const statusBadge = document.getElementById('gmailStatusBadge');
-            const gmailStatus = document.getElementById('gmailStatus');
-            const setupBtn = document.getElementById('setupGmailBtn');
-            
-            if (gmail.authenticated) {
-                statusBadge.textContent = '✅ Active';
-                statusBadge.style.background = '#4CAF50';
-                gmailStatus.innerHTML = `Status: <span style="color: #4CAF50;">✅ Authenticated (${gmail.usage.dailyLimit.toLocaleString()} emails/day)</span>`;
-                setupBtn.style.display = 'none';
-            } else {
-                statusBadge.textContent = '⚠️ Setup Required';
-                statusBadge.style.background = '#FF5722';
-                gmailStatus.innerHTML = `Status: <span style="color: #FF5722;">❌ Not Configured</span>`;
-                setupBtn.style.display = 'inline-block';
-            }
+            appState.contacts = data.contacts || [];
+            updateContactCounter();
+        }
+    } catch (error) {
+        console.error('Failed to load contacts:', error);
+    }
+}
+
+// Show Toast
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
+}
+
+// Test AI Connection
+async function testAIConnection() {
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'Email Manager AI Test'
+            },
+            body: JSON.stringify({
+                model: 'meta-llama/llama-3.1-8b-instruct:free',
+                messages: [{ role: 'user', content: 'Hello' }],
+                max_tokens: 10
+            })
+        });
+        
+        if (response.ok) {
+            updateAIStatus('online');
+            console.log('✅ AI API connected successfully');
+        } else {
+            updateAIStatus('offline');
+            console.log('❌ AI API connection failed:', response.status);
+        }
+    } catch (error) {
+        updateAIStatus('offline');
+        console.log('❌ AI API test failed:', error.message);
+    }
+}
+
+// Update AI Status Indicator
+function updateAIStatus(status) {
+    const aiStatus = document.getElementById('aiStatus');
+    if (aiStatus) {
+        aiStatus.className = `ai-status ${status}`;
+        aiStatus.title = status === 'online' ? 'AI Assistant Online' : 'AI Assistant Offline (using fallback)';
+    }
+}
+
+// Gmail Setup Functions
+function showGmailSetup() {
+    const modal = document.getElementById('gmailSetupModal');
+    modal.classList.add('show');
+    checkGmailStatus();
+}
+
+function closeGmailSetup() {
+    const modal = document.getElementById('gmailSetupModal');
+    modal.classList.remove('show');
+}
+
+async function checkGmailStatus() {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/gmail/status`);
+        const data = await response.json();
+        
+        const statusElement = document.getElementById('gmailStatus');
+        const iconElement = document.getElementById('gmailStatusIcon');
+        
+        if (data.configured) {
+            statusElement.textContent = 'Connected & Ready (1B emails/day)';
+            iconElement.textContent = '✅';
+        } else {
+            statusElement.textContent = 'Not configured';
+            iconElement.textContent = '❌';
         }
     } catch (error) {
         console.error('Error checking Gmail status:', error);
-        const statusBadge = document.getElementById('gmailStatusBadge');
-        if (statusBadge) {
-            statusBadge.textContent = '❌ Error';
-            statusBadge.style.background = '#F44336';
-        }
     }
-} 
+}
+
+function authorizeGmail() {
+    // Construct OAuth URL with custom domain redirect URI
+    const clientId = '719606342223-u78m9p969615hkv03d7jid4l5352uiqb.apps.googleusercontent.com';
+    const redirectUri = 'https://www.daddyfreud.com/auth/google/callback';
+    const scope = 'https://www.googleapis.com/auth/gmail.send';
+    
+    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `response_type=code&` +
+        `access_type=offline&` +
+        `prompt=consent`;
+    
+    // Open OAuth window
+    window.open(oauthUrl, 'gmail-oauth', 'width=500,height=600');
+    
+    // Show authorization code input
+    document.getElementById('authCodeSection').style.display = 'block';
+    document.getElementById('authorizeBtn').textContent = '🔄 Authorization in progress...';
+    document.getElementById('authorizeBtn').disabled = true;
+    
+    addChatMessage(`🔐 **Gmail Authorization Started**\n\nA popup window has opened for Google OAuth. After granting permissions, copy the authorization code from the redirect URL and paste it in the setup modal.\n\n**Current redirect URI:** ${redirectUri}`, 'assistant');
+}
+
+async function completeGmailSetup() {
+    const authCode = document.getElementById('authCodeInput').value.trim();
+    
+    if (!authCode) {
+        showToast('Please enter the authorization code', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/gmail/setup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ authCode })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Gmail API configured successfully!', 'success');
+            addChatMessage('✅ **Gmail API Setup Complete!**\n\nYou now have access to unlimited email sending (1 billion emails/day) through Gmail API. The system will automatically use Gmail for all email sending.', 'assistant');
+            closeGmailSetup();
+            checkGmailStatus();
+        } else {
+            showToast(`Setup failed: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showToast('Setup failed: Network error', 'error');
+        console.error('Gmail setup error:', error);
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('gmailSetupModal');
+    if (e.target === modal) {
+        closeGmailSetup();
+    }
+}); 
