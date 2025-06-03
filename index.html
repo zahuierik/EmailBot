@@ -3,97 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Manager - AI Chat</title>
+    <title>DaddyFreud - Unconscious Cold Email Automation</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
-        <!-- Main Chat Interface -->
-        <main class="chat-container">
-            <!-- Messages Area -->
-            <div id="chatMessages" class="messages-area">
-                <!-- Chat messages will appear here -->
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <button id="googleSignBtn" class="nav-btn sign-in" onclick="handleGoogleAuth()">
+                    <span class="material-icons">account_circle</span>
+                    <span id="authText">Sign In with Google</span>
+                </button>
+                <button class="nav-btn email-template" onclick="showEmailTemplate()">
+                    <span class="material-icons">email</span>
+                    Email Template
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Container -->
+        <main class="main-container">
+            <!-- Empty State / Landing -->
+            <div id="emptyState" class="empty-state-container">
+                <div class="freud-portrait">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMzMzIiByeD0iNTAiLz4KPHN2ZyB4PSIyNSIgeT0iMjUiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+CjxjaXJjbGUgY3g9IjI1IiBjeT0iMjUiIHI9IjIwIiBmaWxsPSIjNjY2Ii8+Cjwvc3ZnPgo8L3N2Zz4K" alt="Freud" />
+                </div>
+                <h1 class="main-headline">
+                    Help me run unconsciously<br>
+                    for your cold email efforts.
+                </h1>
             </div>
 
-            <!-- Input Bar -->
-            <div class="input-bar">
-                <!-- AI Status Indicator -->
-                <div class="ai-status" id="aiStatus" title="AI Assistant Status">
-                    <span class="material-icons">smart_toy</span>
-                </div>
-                
-                <!-- URL Input -->
-                <div class="input-wrapper">
+            <!-- Chat Messages Area -->
+            <div id="chatMessages" class="chat-messages" style="display: none;">
+                <!-- Messages will appear here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="left-actions">
+                        <button class="action-btn attach-btn" onclick="handleAttach()">
+                            <span class="material-icons">attach_file</span>
+                            Attach
+                        </button>
+                        <button class="action-btn emails-btn" onclick="handleEmailsAction()">
+                            <span class="material-icons">email</span>
+                            Emails
+                        </button>
+                    </div>
                     <input 
                         type="text" 
-                        id="urlInput" 
-                        class="url-input" 
-                        placeholder="Ask me anything, add emails, or enter a website URL to scrape..."
+                        id="mainInput" 
+                        class="main-input" 
+                        placeholder="Add emails, websites or ask me anything."
                         onkeydown="handleInputKeydown(event)"
                     />
+                    <button class="send-btn" onclick="handleSendMessage()" title="Send">
+                        <span class="material-icons">send</span>
+                    </button>
                 </div>
-                
-                <!-- Send Button -->
-                <button class="action-btn send-btn" onclick="handleUserInput()" title="Send Message">
-                    <span class="material-icons">send</span>
-                </button>
             </div>
         </main>
 
-        <!-- Contact Counter (Floating) -->
-        <div class="contact-counter" id="contactCounter" onclick="showContactsSummary()">
-            <span class="material-icons">contacts</span>
-            <span id="contactCount">0</span>
-        </div>
+        <!-- Email Template Modal -->
+        <div id="emailTemplateModal" class="modal-overlay">
+            <div class="modal template-modal">
+                <div class="modal-header">
+                    <h3>🎨 Drag & Drop Email Builder</h3>
+                    <button class="close-btn" onclick="closeEmailTemplate()">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="modal-content template-content">
+                    <div class="template-builder-container">
+                        <!-- Left Panel: Components Palette -->
+                        <div class="components-palette">
+                            <h4>📦 Email Components</h4>
+                            <div class="component-items">
+                                <div class="component-item" draggable="true" data-type="header">
+                                    <span class="material-icons">title</span>
+                                    <span>Header</span>
+                                </div>
+                                <div class="component-item" draggable="true" data-type="text">
+                                    <span class="material-icons">text_fields</span>
+                                    <span>Text Block</span>
+                                </div>
+                                <div class="component-item" draggable="true" data-type="button">
+                                    <span class="material-icons">smart_button</span>
+                                    <span>Call to Action</span>
+                                </div>
+                                <div class="component-item" draggable="true" data-type="image">
+                                    <span class="material-icons">image</span>
+                                    <span>Image</span>
+                                </div>
+                                <div class="component-item" draggable="true" data-type="divider">
+                                    <span class="material-icons">horizontal_rule</span>
+                                    <span>Divider</span>
+                                </div>
+                                <div class="component-item" draggable="true" data-type="spacer">
+                                    <span class="material-icons">space_bar</span>
+                                    <span>Spacer</span>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Settings Button (Floating) -->
-        <div class="settings-btn" id="settingsBtn" onclick="showGmailSetup()">
-            <span class="material-icons">settings</span>
+                        <!-- Center Panel: Email Canvas -->
+                        <div class="email-canvas-container">
+                            <div class="canvas-toolbar">
+                                <input type="text" id="emailSubjectDnd" placeholder="📧 Email Subject Line..." />
+                                <div class="canvas-actions">
+                                    <button class="btn secondary" onclick="clearCanvas()">🗑️ Clear</button>
+                                    <button class="btn secondary" onclick="previewEmailDnd()">👁️ Preview</button>
+                                    <button class="btn primary" onclick="saveEmailTemplateDnd()">💾 Save Template</button>
+                                </div>
+                            </div>
+                            <div id="emailCanvas" class="email-canvas">
+                                <div class="canvas-placeholder">
+                                    <span class="material-icons">email</span>
+                                    <p>Drag components here to build your email</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Properties -->
+                        <div class="properties-panel">
+                            <h4>⚙️ Properties</h4>
+                            <div id="propertiesContent" class="properties-content">
+                                <div class="no-selection">
+                                    <span class="material-icons">touch_app</span>
+                                    <p>Select a component to edit its properties</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Gmail Setup Modal -->
         <div id="gmailSetupModal" class="modal-overlay">
             <div class="modal">
                 <div class="modal-header">
-                    <h3>📧 Email Service Status & Setup</h3>
+                    <h3>🔐 Gmail Integration Setup</h3>
                     <button class="close-btn" onclick="closeGmailSetup()">
                         <span class="material-icons">close</span>
                     </button>
                 </div>
                 <div class="modal-content">
-                    <div class="service-status">
+                    <div class="auth-status">
                         <div class="status-item">
                             <span class="material-icons">email</span>
                             <div>
-                                <strong>Gmail API</strong>
-                                <p id="gmailStatus">Not configured</p>
+                                <strong>Gmail API Status</strong>
+                                <p id="gmailStatus">Not connected</p>
                             </div>
                             <span id="gmailStatusIcon" class="status-icon">❌</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="material-icons">send</span>
-                            <div>
-                                <strong>SendGrid Backup</strong>
-                                <p>Active (100 emails/day)</p>
-                            </div>
-                            <span class="status-icon">✅</span>
                         </div>
                     </div>
 
                     <div class="gmail-setup">
-                        <h4>🚀 Setup Gmail API</h4>
-                        <p>Get unlimited email sending with Gmail API (1 billion emails/day)</p>
+                        <h4>🚀 Unlimited Email Sending</h4>
+                        <p>Connect your Gmail account for unlimited cold email automation</p>
                         
                         <div class="setup-steps">
                             <button id="authorizeBtn" class="btn primary" onclick="authorizeGmail()">
-                                🔐 Authorize Gmail
+                                🔐 Authorize Gmail Access
                             </button>
                             
                             <div id="authCodeSection" style="display: none;">
                                 <label>Authorization Code:</label>
-                                <input type="text" id="authCodeInput" placeholder="Paste authorization code here..." />
+                                <input type="text" id="authCodeInput" placeholder="Paste the authorization code..." />
                                 <button class="btn primary" onclick="completeGmailSetup()">
                                     ✅ Complete Setup
                                 </button>
@@ -106,8 +189,61 @@
 
         <!-- Toast Notification -->
         <div id="toast" class="toast">
-            <span class="material-icons">check_circle</span>
             <span id="toastMessage">Success message</span>
+        </div>
+
+        <!-- Contact Database Modal -->
+        <div id="contactDatabaseModal" class="modal-overlay">
+            <div class="modal database-modal">
+                <div class="modal-header">
+                    <h3>📊 Contact Database</h3>
+                    <div class="database-controls">
+                        <button class="btn secondary" onclick="exportContacts()">📁 Export CSV</button>
+                        <button class="btn secondary" onclick="clearDatabase()">🗑️ Clear All</button>
+                    </div>
+                    <button class="close-btn" onclick="closeContactDatabase()">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="modal-content database-content">
+                    <div class="database-stats">
+                        <div class="stat-card">
+                            <h4 id="totalContactsCount">0</h4>
+                            <p>Total Contacts</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="sourcesCount">0</h4>
+                            <p>Sources</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4 id="verifiedCount">0</h4>
+                            <p>Ready to Email</p>
+                        </div>
+                    </div>
+                    
+                    <div class="database-filters">
+                        <input type="text" id="contactSearch" placeholder="🔍 Search contacts..." onkeyup="filterContacts()" />
+                        <select id="sourceFilter" onchange="filterContacts()">
+                            <option value="">All Sources</option>
+                        </select>
+                    </div>
+                    
+                    <div class="contacts-table-container">
+                        <table class="contacts-table">
+                            <thead>
+                                <tr>
+                                    <th>Email Address</th>
+                                    <th>Source</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contactsTableBody">
+                                <!-- Contacts will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     

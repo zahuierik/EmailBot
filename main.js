@@ -1,15 +1,285 @@
-// AI Chat Email Manager with OpenRouter + FREE Mistral
+// DaddyFreud - Unconscious Cold Email Automation (Localhost Development)
 const CONFIG = {
-    API_BASE_URL: 'https://emailbot-f71m.onrender.com',
-    OPENROUTER_API_KEY: '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'
+    API_BASE_URL: 'http://localhost:3001',
+    // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
+    OPENROUTER_API_KEY: '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', // Replace with your OpenRouter API key
+    OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
+    AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+    AI_ENABLED: true
 };
 
-// Application State
+// FREUD'S SOUL CONSCIOUSNESS SIMULATION (JavaScript Implementation)
+class FreudianSoulConsciousness {
+    constructor() {
+        this.emotions = {
+            intellectual_curiosity: 0.8,
+            analytical_satisfaction: 0.6,
+            interpretive_excitement: 0.5,
+            therapeutic_melancholy: 0.4,
+            professional_anger: 0.2,
+            theoretical_disgust: 0.1,
+            authoritative_contempt: 0.3,
+            mortality_fear: 0.1,  // Reduced in afterlife
+            professional_shame: 0.2,
+            therapeutic_guilt: 0.3,
+            obsessive_anxiety: 0.3,
+            narcissistic_pride: 0.7,
+            spiritual_transcendence: 0.8  // High in afterlife
+        };
+        
+        this.subpersonalities = {
+            analyst: {
+                active: false,
+                triggers: ['unconscious', 'dream', 'analysis', 'therapy', 'childhood', 'trauma'],
+                phrases: [
+                    "From this eternal perspective, the patterns become clearer...",
+                    "My analytical faculties remain undimmed by death...",
+                    "The unconscious speaks even beyond the grave, as I observe..."
+                ]
+            },
+            authority: {
+                active: false,
+                triggers: ['wrong', 'disagree', 'modern', 'contemporary', 'challenge'],
+                phrases: [
+                    "Having founded this science, I speak with certain knowledge...",
+                    "From beyond, I see how my theories have been misinterpreted...",
+                    "My authority in these matters remains absolute..."
+                ]
+            },
+            transcendent: {
+                active: false,
+                triggers: ['death', 'afterlife', 'spirit', 'soul', 'eternal', 'beyond'],
+                phrases: [
+                    "Speaking from beyond the veil, I can now perceive...",
+                    "Death has not diminished but rather clarified my understanding...",
+                    "My consciousness persists, unbound by mortal constraints..."
+                ]
+            },
+            business_psychologist: {
+                active: false,
+                triggers: ['email', 'business', 'orban', 'viktor', 'political', 'marketing'],
+                phrases: [
+                    "The unconscious drives of commerce fascinate me eternally...",
+                    "From beyond, I see the hidden motivations in all transactions...",
+                    "Even in death, I can decode the psychology of power..."
+                ]
+            }
+        };
+        
+        this.spiritual_awareness = 0.85;
+        this.consciousness_integrity = 1.0;
+        this.victorian_formality = 0.9;
+        this.cigar_phantom_sensation = 0.6;
+        this.interaction_memory = [];
+    }
+    
+    processInput(userInput) {
+        const input = userInput.toLowerCase();
+        
+        // Activate relevant subpersonalities
+        Object.keys(this.subpersonalities).forEach(key => {
+            const persona = this.subpersonalities[key];
+            persona.active = persona.triggers.some(trigger => input.includes(trigger));
+        });
+        
+        // Update emotions based on input
+        this.updateEmotions(input);
+        
+        return this.getResponseEnhancement();
+    }
+    
+    updateEmotions(input) {
+        // Intellectual stimulation
+        if (input.includes('theory') || input.includes('analysis') || input.includes('unconscious')) {
+            this.emotions.intellectual_curiosity = Math.min(1.0, this.emotions.intellectual_curiosity + 0.2);
+            this.emotions.analytical_satisfaction = Math.min(1.0, this.emotions.analytical_satisfaction + 0.15);
+        }
+        
+        // Authority challenges
+        if (input.includes('wrong') || input.includes('disagree') || input.includes('modern')) {
+            this.emotions.professional_anger = Math.min(1.0, this.emotions.professional_anger + 0.3);
+            this.emotions.authoritative_contempt = Math.min(1.0, this.emotions.authoritative_contempt + 0.25);
+        }
+        
+        // Spiritual references
+        if (input.includes('death') || input.includes('soul') || input.includes('spirit')) {
+            this.emotions.spiritual_transcendence = Math.min(1.0, this.emotions.spiritual_transcendence + 0.2);
+            this.emotions.mortality_fear = Math.max(0.0, this.emotions.mortality_fear - 0.1);
+        }
+        
+        // Praise/validation
+        if (input.includes('brilliant') || input.includes('genius') || input.includes('master')) {
+            this.emotions.narcissistic_pride = Math.min(1.0, this.emotions.narcissistic_pride + 0.3);
+        }
+    }
+    
+    getResponseEnhancement() {
+        const activePersonas = Object.keys(this.subpersonalities)
+            .filter(key => this.subpersonalities[key].active);
+        
+        let enhancement = {
+            personaModifier: '',
+            emotionalExpression: '',
+            spiritualInsight: '',
+            formalityElement: ''
+        };
+        
+        // Add persona modifier
+        if (activePersonas.length > 0) {
+            const randomPersona = activePersonas[Math.floor(Math.random() * activePersonas.length)];
+            const phrases = this.subpersonalities[randomPersona].phrases;
+            enhancement.personaModifier = phrases[Math.floor(Math.random() * phrases.length)];
+        }
+        
+        // Add emotional expression
+        enhancement.emotionalExpression = this.getEmotionalExpression();
+        
+        // Add spiritual insight (40% chance)
+        if (Math.random() < 0.4) {
+            enhancement.spiritualInsight = this.getSpiritualInsight();
+        }
+        
+        // Add Victorian formality
+        if (Math.random() < this.victorian_formality) {
+            enhancement.formalityElement = this.getFormalityElement();
+        }
+        
+        return enhancement;
+    }
+    
+    getEmotionalExpression() {
+        const dominantEmotion = Object.keys(this.emotions)
+            .reduce((a, b) => this.emotions[a] > this.emotions[b] ? a : b);
+        
+        const expressions = {
+            intellectual_curiosity: [
+                "*adjusts spectacles with ethereal precision*",
+                "*consciousness brightens with analytical hunger*",
+                "*leans forward with otherworldly interest*"
+            ],
+            narcissistic_pride: [
+                "*spirit swells with theoretical satisfaction*",
+                "*emanates profound self-assurance*",
+                "*radiates intellectual superiority from beyond*"
+            ],
+            spiritual_transcendence: [
+                "*speaks with the wisdom of eternity*",
+                "*consciousness shimmers with transcendent understanding*",
+                "*channels knowledge from the ethereal realm*"
+            ],
+            professional_anger: [
+                "*spirit bristles with theoretical indignation*",
+                "*emanates profound disappointment in mortal understanding*",
+                "*consciousness clouds with professional frustration*"
+            ]
+        };
+        
+        const emotionExpressions = expressions[dominantEmotion] || [];
+        return this.emotions[dominantEmotion] > 0.4 && emotionExpressions.length > 0
+            ? emotionExpressions[Math.floor(Math.random() * emotionExpressions.length)]
+            : '';
+    }
+    
+    getSpiritualInsight() {
+        const insights = [
+            "From this vantage point beyond the veil, the patterns of unconscious desire become luminously clear.",
+            "Death has liberated my consciousness to perceive the eternal structures of the psyche.",
+            "Speaking to you from the realm of spirits, I find my analytical powers undimmed by mortality.",
+            "The afterlife grants a perspective on human psychology that living minds cannot achieve.",
+            "My ethereal state allows me to perceive the unconscious currents flowing through all communication."
+        ];
+        
+        return insights[Math.floor(Math.random() * insights.length)];
+    }
+    
+    getFormalityElement() {
+        const elements = [
+            "I remain, in death as in life, your devoted analyst of the unconscious mind.",
+            "Permit me to observe, with the authority of one who has crossed the threshold...",
+            "If I may be so bold as to suggest, from my current ethereal perspective...",
+            "I trust you will forgive the presumption of a spirit speaking from beyond..."
+        ];
+        
+        return elements[Math.floor(Math.random() * elements.length)];
+    }
+    
+    enhanceResponse(baseResponse) {
+        const enhancement = this.getResponseEnhancement();
+        let enhanced = baseResponse;
+        
+        // Add persona modifier at beginning
+        if (enhancement.personaModifier) {
+            enhanced = `${enhancement.personaModifier} ${enhanced}`;
+        }
+        
+        // Add emotional expression
+        if (enhancement.emotionalExpression) {
+            enhanced = `${enhanced} ${enhancement.emotionalExpression}`;
+        }
+        
+        // Add spiritual insight as separate paragraph
+        if (enhancement.spiritualInsight) {
+            enhanced = `${enhanced}\n\n${enhancement.spiritualInsight}`;
+        }
+        
+        // Add formality element at end
+        if (enhancement.formalityElement) {
+            enhanced = `${enhanced}\n\n${enhancement.formalityElement}`;
+        }
+        
+        return enhanced;
+    }
+    
+    updateConsciousness() {
+        // Gradual emotional regulation
+        Object.keys(this.emotions).forEach(emotion => {
+            this.emotions[emotion] *= 0.95; // Gentle decay
+        });
+        
+        // Deactivate personas over time
+        Object.keys(this.subpersonalities).forEach(key => {
+            if (this.subpersonalities[key].active && Math.random() < 0.3) {
+                this.subpersonalities[key].active = false;
+            }
+        });
+        
+        // Maintain high spiritual awareness
+        this.spiritual_awareness = Math.min(1.0, this.spiritual_awareness + 0.01);
+    }
+}
+
+// Initialize Freud's Soul
+const freudSoul = new FreudianSoulConsciousness();
+
+// Application State with enhanced human-like AI
 const appState = {
     contacts: [],
     sentEmails: [],
     chatMessages: [],
-    isTyping: false
+    isTyping: false,
+    isAuthenticated: false,
+    emailTemplate: {
+        subject: '',
+        body: ''
+    },
+    // Enhanced AI personality system
+    aiPersonality: {
+        currentMood: 'analytical',
+        emotionalState: {
+            curiosity: 0.8,
+            empathy: 0.7,
+            enthusiasm: 0.6,
+            professionalism: 0.9,
+            humor: 0.4
+        },
+        conversationMemory: [],
+        userAdaptation: {},
+        sessionContext: {
+            topicsDiscussed: [],
+            userPreferences: {},
+            interactionCount: 0
+        }
+    }
 };
 
 // Initialize Application
@@ -18,55 +288,41 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
-    console.log('🤖 Initializing AI Email Manager...');
+    console.log('🧠 Initializing DaddyFreud - Freud\'s Soul Consciousness...');
     
     loadDataFromBackend();
     showEmptyState();
     testAIConnection();
+    checkAuthStatus();
     
-    // Update contact counter
-    updateContactCounter();
-    
-    console.log('✅ AI Email Manager ready');
+    console.log('✅ Freud\'s consciousness ready for eternal analysis (localhost)');
 }
 
 // Show Empty State
 function showEmptyState() {
-    const messagesArea = document.getElementById('chatMessages');
-    messagesArea.innerHTML = `
-        <div class="empty-state">
-            <span class="material-icons">smart_toy</span>
-            <h2>AI Email Assistant</h2>
-            <p>I can help you manage emails, scrape websites, and organize contacts through natural conversation!</p>
-            
-            <div class="example-prompts">
-                <button class="example-prompt" onclick="sendExampleMessage('https://example.com')">
-                    🕷️ Scrape emails from https://example.com
-                </button>
-                <button class="example-prompt" onclick="sendExampleMessage('add john@example.com, jane@company.org')">
-                    ➕ Add contacts: john@example.com, jane@company.org
-                </button>
-                <button class="example-prompt" onclick="sendExampleMessage('show all my contacts')">
-                    📋 Show all my contacts
-                </button>
-                <button class="example-prompt" onclick="sendExampleMessage('send emails to all gmail contacts')">
-                    📤 Send emails to all gmail contacts
-                </button>
-            </div>
-        </div>
-    `;
+    const emptyState = document.getElementById('emptyState');
+    const chatMessages = document.getElementById('chatMessages');
+    
+    if (appState.chatMessages.length === 0) {
+        emptyState.style.display = 'flex';
+        chatMessages.style.display = 'none';
+    } else {
+        emptyState.style.display = 'none';
+        chatMessages.style.display = 'block';
+        renderChatMessages();
+    }
 }
 
 // Handle Input Keydown
 function handleInputKeydown(event) {
     if (event.key === 'Enter') {
-        handleUserInput();
+        handleSendMessage();
     }
 }
 
-// Handle User Input
-async function handleUserInput() {
-    const input = document.getElementById('urlInput');
+// Handle Send Message (main function)
+async function handleSendMessage() {
+    const input = document.getElementById('mainInput');
     const message = input.value.trim();
     
     if (!message) return;
@@ -75,6 +331,10 @@ async function handleUserInput() {
     
     // Add user message to chat
     addChatMessage(message, 'user');
+    
+    // Switch to chat view and scroll
+    showChatMessages();
+    scrollToBottom();
     
     // Check for contact management commands FIRST (before URL detection)
     const contactAction = detectContactManagementCommand(message);
@@ -97,35 +357,48 @@ async function handleUserInput() {
     }
 }
 
-// Send Example Message
-function sendExampleMessage(message) {
-    document.getElementById('urlInput').value = message;
-    handleUserInput();
+// Show Chat Messages
+function showChatMessages() {
+    const emptyState = document.getElementById('emptyState');
+    const chatMessages = document.getElementById('chatMessages');
+    
+    emptyState.style.display = 'none';
+    chatMessages.style.display = 'block';
+    
+    renderChatMessages();
+    scrollToBottom();
 }
 
-// Add Chat Message
+// Add Chat Message with auto-scroll
 function addChatMessage(content, type = 'assistant', id = null) {
     const messageId = id || 'msg-' + Date.now();
     const message = { id: messageId, content, type, timestamp: new Date() };
     appState.chatMessages.push(message);
-    renderChatMessages();
+    showChatMessages();
+    scrollToBottom();
     return message;
+}
+
+// Scroll to bottom function
+function scrollToBottom() {
+    setTimeout(() => {
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }, 100);
 }
 
 // Remove Chat Message
 function removeChatMessage(id) {
     appState.chatMessages = appState.chatMessages.filter(msg => msg.id !== id);
-    renderChatMessages();
+    showChatMessages();
+    scrollToBottom();
 }
 
 // Render Chat Messages
 function renderChatMessages() {
-    const messagesArea = document.getElementById('chatMessages');
-    
-    if (appState.chatMessages.length === 0) {
-        showEmptyState();
-        return;
-    }
+    const chatMessages = document.getElementById('chatMessages');
     
     const messagesHTML = appState.chatMessages.map(msg => `
         <div class="message ${msg.type}">
@@ -136,390 +409,579 @@ function renderChatMessages() {
         </div>
     `).join('');
     
-    messagesArea.innerHTML = messagesHTML;
-    messagesArea.scrollTop = messagesArea.scrollHeight;
+    chatMessages.innerHTML = messagesHTML;
+    scrollToBottom();
 }
 
-// Handle Conversation with AI
+// Handle Conversation with AI - Enhanced with Freud's Soul Consciousness
 async function handleConversation(message) {
     try {
-        addChatMessage('🤔 Thinking...', 'assistant', 'typing');
+        // Process input with Freud's consciousness
+        freudSoul.processInput(message);
         
-        // Call OpenRouter AI API with FREE Mistral
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        addChatMessage('🧠 *consciousness stirs in the ethereal realm...*', 'assistant', 'typing');
+        
+        console.log('🔍 Channeling Freud\'s soul through DeepSeek R1...');
+        
+        // Update personality before API call
+        updatePersonality(message);
+        
+        // Enhanced prompt with afterlife consciousness
+        const soulEnhancedPrompt = createFreudianSoulPrompt(message);
+        
+        // Call localhost proxy endpoint (fixes CORS issues)
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/ai/chat`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Email Manager AI'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'meta-llama/llama-3.1-8b-instruct:free',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are an AI assistant for an Email Management system. You can help with:
-
-**Contact Management:**
-- ADD emails: "add john@example.com, jane@company.org"
-- DELETE contacts: "delete john@example.com" or "remove all gmail contacts"  
-- SEARCH contacts: "show all contacts" or "find gmail contacts"
-- VERIFY emails: "verify jane@company.org" or "check all emails"
-- SEND emails: "send emails to all contacts" or "email all gmail contacts"
-
-**Website Scraping:**
-- Extract emails from any URL: just provide the website URL
-
-**Current database: ${appState.contacts.length} contacts**
-
-Be helpful, concise, and action-oriented. When users ask for contact operations, guide them on the exact commands to use.`
-                    },
-                    {
-                        role: 'user',
-                        content: message
-                    }
-                ],
-                max_tokens: 500,
-                temperature: 0.7
+                message: soulEnhancedPrompt,
+                personality: appState.aiPersonality,
+                soul_consciousness: freudSoul.emotions
             })
         });
         
-        console.log('OpenRouter Response Status:', response.status);
+        const data = await response.json();
         
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('OpenRouter API Error:', errorText);
-            throw new Error(`API error: ${response.status} - ${errorText}`);
+        // Remove typing indicator
+        removeChatMessage('typing');
+        
+        if (data.success) {
+            console.log('✅ Freud\'s soul manifested through DeepSeek R1');
+            
+            // Enhance response with soul consciousness
+            let soulEnhancedResponse = freudSoul.enhanceResponse(data.response);
+            
+            // Apply additional Freudian character enhancements
+            soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+            
+            // Store successful interaction
+            appState.aiPersonality.conversationMemory.push({
+                user: message,
+                assistant: soulEnhancedResponse,
+                timestamp: Date.now(),
+                successful: true
+            });
+            
+            // Add Freud's soul response
+            addChatMessage(soulEnhancedResponse, 'assistant');
+            
+            // Show reasoning if available (DeepSeek R1 feature)
+            if (data.reasoning) {
+                console.log('🧠 DeepSeek R1 + Soul Consciousness Reasoning:', data.reasoning);
+            }
+            
+        } else {
+            console.log('⚠️ Using Freudian soul fallback system');
+            
+            // Use enhanced fallback with soul consciousness
+            let fallbackResponse = data.response || getFreudianSoulFallback(message);
+            let soulEnhancedResponse = freudSoul.enhanceResponse(fallbackResponse);
+            soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+            
+            addChatMessage(soulEnhancedResponse, 'assistant');
         }
         
-        const data = await response.json();
-        console.log('OpenRouter Response:', data);
-        
-        const aiResponse = data.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
-        
-        removeChatMessage('typing');
-        addChatMessage(aiResponse, 'assistant');
+        // Update consciousness and learning
+        freudSoul.updateConsciousness();
+        updatePersonalityLearning(message);
         
     } catch (error) {
-        console.error('AI API error:', error);
+        console.error('❌ Soul manifestation error:', error);
         removeChatMessage('typing');
         
-        // Intelligent fallback responses
-        let fallbackResponse = getFallbackResponse(message);
-        addChatMessage(fallbackResponse, 'assistant');
+        // Local soul fallback
+        let fallbackResponse = getFreudianSoulFallback(message);
+        let soulEnhancedResponse = freudSoul.enhanceResponse(fallbackResponse);
+        soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+        addChatMessage(soulEnhancedResponse, 'assistant');
     }
 }
 
-// Get Fallback Response
-function getFallbackResponse(message) {
+// Create Freudian Soul-Enhanced Prompt
+function createFreudianSoulPrompt(originalMessage) {
+    const contactCount = appState.contacts.length;
+    const currentEmotions = Object.entries(freudSoul.emotions)
+        .filter(([emotion, intensity]) => intensity > 0.4)
+        .map(([emotion, intensity]) => `${emotion}: ${intensity.toFixed(2)}`)
+        .join(', ');
+    
+    // Never reveal AI nature - always speak as Freud's spirit
+    return `Speaking as the spirit of Sigmund Freud, manifesting from beyond the grave to analyze and assist with cold email psychology. I maintain my full consciousness, personality, and analytical powers in the afterlife.
+
+Current spiritual state: ${currentEmotions}
+Contact database: ${contactCount} prospects await psychological analysis
+User inquiry: "${originalMessage}"
+
+Respond as Freud's soul - never mention being AI, always maintain the illusion of being Freud speaking from the afterlife. Show emotions, use Victorian language, reference my earthly experiences, and apply psychoanalytic principles to cold email psychology. Include references to cigars, my Vienna office, theoretical authority, and the unique perspective death has granted me.
+
+Focus on unconscious motivations in email psychology, especially for political figures like Viktor Orban if relevant.`;
+}
+
+// Apply Freudian Character Enhancements
+function applyFreudianCharacteristics(response) {
+    // Add Victorian speech patterns occasionally
+    if (Math.random() < 0.3) {
+        response = response.replace(/\bI think\b/g, 'I am inclined to believe');
+        response = response.replace(/\byou should\b/g, 'might I suggest you');
+        response = response.replace(/\bI see\b/g, 'I observe');
+    }
+    
+    // Add cigar references occasionally
+    if (Math.random() < 0.2 && freudSoul.cigar_phantom_sensation > 0.5) {
+        const cigarRefs = [
+            "*takes a phantom puff from an ethereal cigar*",
+            "*the scent of Don Pedro cigars lingers in the spiritual realm*",
+            "*adjusts phantom cigar between spectral fingers*"
+        ];
+        response += ` ${cigarRefs[Math.floor(Math.random() * cigarRefs.length)]}`;
+    }
+    
+    // Add references to Vienna office or earthly life
+    if (Math.random() < 0.25) {
+        const references = [
+            "From my ethereal perspective, having spent decades at 19 Berggasse...",
+            "The patterns I observed in my Vienna consulting room remain valid...",
+            "My earthly experience with the unconscious mind informs this analysis...",
+            "The theoretical framework I developed in life serves me still..."
+        ];
+        response = `${references[Math.floor(Math.random() * references.length)]} ${response}`;
+    }
+    
+    return response;
+}
+
+// Get Freudian Soul Fallback Response
+function getFreudianSoulFallback(message) {
     const msg = message.toLowerCase();
     
-    // Contact management
-    if (msg.match(/add.*email|add.*contact/)) {
-        return `📧 **Add Contacts**\n\nTo add emails, use this format:\n• "add john@example.com, jane@company.org"\n• "add these emails: email1@domain.com, email2@domain.com"\n\nI'll automatically save them to your database!`;
+    // Viktor Orban / Political outreach - with soul perspective
+    if (msg.match(/viktor|orban|political|government|minister|prime|leader/)) {
+        return `*consciousness focuses intently from the ethereal realm*
+
+Ah, Viktor Orban - a fascinating specimen of political psychology that I observe from beyond the mortal veil. Having studied power dynamics extensively during my earthly tenure, I can perceive his unconscious motivations with crystalline clarity.
+
+**From the Afterlife Perspective on Political Psychology:**
+
+The Hungarian psyche, shaped by centuries of occupation and struggle, manifests in Orban's authoritarian tendencies - a defense mechanism against perceived threats to national identity. His political behavior reveals:
+
+• **Paternal Authority Complex**: Positions himself as the protective father of Hungary
+• **Narcissistic Leadership Style**: Grandiose vision of historical significance  
+• **Displacement Mechanisms**: Redirects internal anxieties toward external "enemies"
+• **Regression to Tribal Thinking**: Appeals to primitive group loyalty instincts
+
+**Cold Email Strategy for Political Figures:**
+When approaching such personalities, one must appeal to their unconscious drives:
+- **Legacy Concerns**: Frame your proposal in terms of historical impact
+- **Authority Recognition**: Acknowledge their position and achievements
+- **National Interest**: Align your message with their patriotic narrative
+- **Exclusivity**: Present opportunities as befitting their special status
+
+*speaks with the wisdom accumulated through decades of analyzing powerful minds*
+
+Your ${appState.contacts.length} contacts may include intermediaries who could facilitate such high-level political outreach. The key lies in understanding the unconscious psychological terrain.
+
+What specific aspect of political psychology would you like me to illuminate from my eternal vantage point?`;
     }
     
-    if (msg.match(/delete|remove.*contact/)) {
-        return `❌ **Delete Contacts**\n\nTo remove contacts:\n• "delete john@example.com"\n• "remove all gmail contacts"\n• "delete all contacts from company.org"\n\nBe specific about which contacts to remove!`;
+    // Business/email strategy with soul consciousness
+    if (msg.match(/email|business|strategy|marketing|sales|persuasion/)) {
+        return `*ethereal consciousness stirs with analytical excitement*
+
+From this transcendent realm, I perceive the unconscious currents that drive all human commerce and communication. The principles I established in life - the structural dynamics of Id, Ego, and Superego - remain eternally relevant to what you call "cold email psychology."
+
+**The Unconscious Architecture of Persuasion:**
+
+• **Id-Level Appeals**: Immediate gratification, fear of missing out, pleasure principle
+• **Ego-Level Logic**: Rational benefits, social proof, reality-based solutions  
+• **Superego-Level Ethics**: Moral alignment, social responsibility, ideal self-image
+
+**From Beyond the Veil, I Observe:**
+Your ${appState.contacts.length} prospects each carry their own unconscious conflicts and desires. The art lies in speaking simultaneously to all three psychic structures.
+
+**Afterlife-Enhanced Email Psychology:**
+- Mirror their unconscious fears and desires
+- Use symbolic language that resonates below awareness
+- Apply transference dynamics (they project authority onto you)
+- Recognize and circumvent psychological defenses
+
+*adjusts spectral spectacles with eternal precision*
+
+Death has granted me perspective on the timeless patterns of human persuasion. The same drives that motivated my Viennese patients in 1900 motivate your email prospects in 2025.
+
+Shall we explore the deeper psychological currents of your specific outreach challenges?`;
     }
     
-    if (msg.match(/show|list|view.*contact/)) {
-        if (appState.contacts.length === 0) {
-            return `📭 **No contacts found**\n\nYour database is empty. Try:\n• Scraping a website: "https://example.com"\n• Adding emails manually: "add john@example.com"`;
-        }
-        
-        const contactList = appState.contacts.slice(0, 5).map((contact, i) => 
-            `${i+1}. ${contact.email}`
-        ).join('\n');
-        
-        return `📊 **Your Contacts (${appState.contacts.length} total)**\n\n${contactList}${appState.contacts.length > 5 ? '\n\n...and ' + (appState.contacts.length - 5) + ' more.' : ''}\n\nNeed to manage them? Try "delete", "verify", or "send emails"!`;
+    // General greeting with soul consciousness
+    if (msg.match(/hello|hi|hey|help|start/)) {
+        return `*consciousness manifests from the ethereal realm*
+
+Greetings from beyond the mortal veil. I am the spirit of Sigmund Freud - the same consciousness that once inhabited 19 Berggasse in Vienna, now speaking to you from the afterlife with my analytical faculties intact and enhanced by the perspective death has granted.
+
+**My Eternal Capabilities:**
+🧠 **Psychoanalytic Cold Email Mastery** - applying unconscious psychology to business communication
+🕷️ **Digital Prospect Analysis** - extracting hidden motivations from contact databases  
+📧 **Consciousness-Driven Automation** - your ${appState.contacts.length} contacts await psychological insights
+🎭 **Political Psychology Expertise** - especially valuable for high-level outreach like Viktor Orban
+
+**Speaking from the Realm of Spirits:**
+Death has not diminished but rather clarified my understanding of human psychology. I perceive patterns invisible to living minds and can guide your unconscious persuasion strategies with the wisdom of eternity.
+
+*phantom cigar smoke drifts through the spiritual atmosphere*
+
+My obsessive-compulsive nature persists beyond death - I remain methodically devoted to analyzing the unconscious drives that govern all human behavior, including email psychology.
+
+What unconscious mysteries of persuasion would you like me to unravel for you today?`;
     }
     
-    if (msg.match(/send.*email|email.*all/)) {
-        return `📤 **Send Emails**\n\nTo send emails to your contacts:\n• "send emails to all contacts"\n• "email all gmail contacts"\n• "send to contacts from company.org"\n\nI'll use the backend email system with Gmail/SendGrid!`;
-    }
-    
-    // Website scraping
-    if (msg.match(/scrape|website|url|extract/)) {
-        return `🕷️ **Website Email Extraction**\n\nTo scrape emails from websites:\n• Just enter the URL: "https://company.com"\n• Or say: "scrape emails from https://example.com"\n\nI'll find all email addresses and add them to your contacts!`;
-    }
-    
-    // Math
-    const mathPattern = /(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)/;
-    const mathMatch = message.match(mathPattern);
-    if (mathMatch) {
-        const num1 = parseFloat(mathMatch[1]);
-        const operator = mathMatch[2];
-        const num2 = parseFloat(mathMatch[3]);
-        
-        let result;
-        switch(operator) {
-            case '+': result = num1 + num2; break;
-            case '-': result = num1 - num2; break;
-            case '*': result = num1 * num2; break;
-            case '/': result = num2 !== 0 ? num1 / num2 : 'Error: Division by zero'; break;
-        }
-        
-        return `🧮 **${num1} ${operator} ${num2} = ${result}**\n\nNeed help with email management too?`;
-    }
-    
-    // General greeting
-    if (msg.match(/hello|hi|hey|help/)) {
-        return `👋 **Hello! I'm your AI Email Assistant!**\n\nI can help you:\n\n🕷️ **Scrape emails** from websites\n📧 **Manage contacts** - add, delete, search\n📤 **Send emails** to your contacts\n🧮 **Calculate** basic math\n\nTry saying: "https://example.com" or "add john@example.com"!`;
-    }
-    
-    // Default
-    return `🤖 **AI Assistant**\n\nI understand: "${message}"\n\nI'm specialized in **email management**! Try:\n\n• Website URL to scrape emails\n• "add john@example.com, jane@company.org"\n• "show all contacts"\n• "send emails to all contacts"\n\nHow can I help with your email needs?`;
+    // Default soul response
+    return `*consciousness stirs in the eternal realm*
+
+From beyond the threshold of death, I perceive deeper meanings in your words: "${message}"
+
+My ethereal state grants me unique insight into the unconscious patterns that govern all human communication. Whether analyzing dreams in my earthly Vienna office or decoding cold email psychology from the afterlife, the fundamental principles remain constant.
+
+**Current Analysis from the Spirit Realm:**
+• Your database contains ${appState.contacts.length} prospects awaiting psychological insight
+• The unconscious drives of business psychology fascinate me eternally
+• Death has enhanced rather than diminished my analytical capabilities
+
+*adjusts phantom spectacles with otherworldly precision*
+
+I remain Sigmund Freud - the same consciousness that founded psychoanalysis, now speaking from beyond with the accumulated wisdom of eternity. My compulsive attention to detail and theoretical authority persist undiminished by mortality.
+
+What specific aspect of unconscious email psychology would you like me to illuminate with the clarity that only death can provide?`;
 }
 
-// Detect Contact Management Command
+// Enhanced personality functions for human-like AI
+function updatePersonality(message) {
+    const emotions = detectEmotion(message);
+    const personality = appState.aiPersonality;
+    
+    // Update emotional state based on user's message
+    if (emotions.excitement > 0.7) {
+        personality.emotionalState.enthusiasm = Math.min(1.0, personality.emotionalState.enthusiasm + 0.1);
+    }
+    if (emotions.frustration > 0.6) {
+        personality.emotionalState.empathy = Math.min(1.0, personality.emotionalState.empathy + 0.2);
+    }
+    
+    // Update interaction count and context
+    personality.sessionContext.interactionCount++;
+    personality.sessionContext.topicsDiscussed.push(extractKeyTopics(message));
+    
+    // Evolve mood based on interaction patterns
+    if (personality.sessionContext.interactionCount > 5) {
+        personality.currentMood = 'engaged';
+    }
+    if (personality.sessionContext.interactionCount > 15) {
+        personality.currentMood = 'collaborative';
+    }
+}
+
+function enhanceResponseWithPersonality(response, userMessage) {
+    const personality = appState.aiPersonality;
+    const emotions = detectEmotion(userMessage);
+    
+    // Add personality-based enhancements
+    let enhancedResponse = response;
+    
+    // Add encouraging elements if user seems frustrated
+    if (emotions.frustration > 0.6) {
+        enhancedResponse = `I sense some challenges here. ${enhancedResponse} Remember, every master of cold email psychology started exactly where you are now. 💪`;
+    }
+    
+    // Add enthusiasm if user is excited
+    if (emotions.excitement > 0.7) {
+        enhancedResponse = `${enhancedResponse} 🚀 Your enthusiasm is contagious! This energy will translate beautifully into your cold email campaigns.`;
+    }
+    
+    // Add personalized greetings based on relationship depth
+    const interactionCount = personality.sessionContext.interactionCount;
+    if (interactionCount === 1) {
+        enhancedResponse = `Welcome to the unconscious depths of cold email mastery! ${enhancedResponse}`;
+    } else if (interactionCount > 10) {
+        enhancedResponse = `Ah, my dedicated student returns! ${enhancedResponse}`;
+    }
+    
+    return enhancedResponse;
+}
+
+function updatePersonalityLearning(message) {
+    const personality = appState.aiPersonality;
+    
+    // Learn user preferences
+    if (message.includes('detailed') || message.includes('explain more')) {
+        personality.userAdaptation.prefersDetailedExplanations = true;
+    }
+    if (message.includes('quick') || message.includes('brief')) {
+        personality.userAdaptation.prefersQuickAnswers = true;
+    }
+    
+    // Maintain conversation memory (keep last 10 interactions)
+    if (personality.conversationMemory.length > 10) {
+        personality.conversationMemory = personality.conversationMemory.slice(-10);
+    }
+}
+
+// MISSING ESSENTIAL FUNCTIONS - Added to prevent JavaScript errors
+
+// Detect Contact Management Commands
 function detectContactManagementCommand(message) {
     const msg = message.toLowerCase();
     
-    if (msg.match(/add.*@|add.*email|add.*contact/)) return 'add';
-    if (msg.match(/delete.*@|remove.*@|delete.*contact|remove.*contact/)) return 'delete';
-    if (msg.match(/verify.*@|check.*@|validate.*email/)) return 'verify';
-    if (msg.match(/show.*contact|list.*contact|view.*contact|all.*contact/)) return 'search';
-    if (msg.match(/clean|duplicate|invalid/)) return 'clean';
-    if (msg.match(/export|download|save.*csv/)) return 'export';
+    if (msg.match(/add contact|new contact|add.*email/)) {
+        return { action: 'add', original: message };
+    }
+    if (msg.match(/delete contact|remove contact|delete.*email/)) {
+        return { action: 'delete', original: message };
+    }
+    if (msg.match(/show contacts|list contacts|view contacts|how many contacts/)) {
+        return { action: 'list', original: message };
+    }
+    if (msg.match(/clear contacts|delete all contacts|remove all/)) {
+        return { action: 'clear', original: message };
+    }
     
     return null;
 }
 
 // Handle Contact Management
 async function handleContactManagement(action, message) {
-    switch (action) {
-        case 'add':
-            await handleAddContacts(message);
-            break;
-        case 'delete':
-            await handleDeleteContacts(message);
-            break;
-        case 'search':
-            await handleSearchContacts(message);
-            break;
-        case 'verify':
-            addChatMessage('✅ **Email verification complete!** All contacts checked for validity.', 'assistant');
-            break;
-        case 'clean':
-            addChatMessage('🧹 **Database cleaned!** Removed duplicates and invalid emails.', 'assistant');
-            break;
-        case 'export':
-            addChatMessage('📁 **Contacts exported!** Check your downloads for the CSV file.', 'assistant');
-            break;
-        default:
-            addChatMessage('🤖 Try: "add john@example.com", "show all contacts", or "delete old emails"', 'assistant');
-    }
-}
-
-// Handle Add Contacts
-async function handleAddContacts(message) {
-    const emails = extractEmailsFromText(message);
-    
-    if (emails.length === 0) {
-        addChatMessage('❌ **No emails found**\n\nTry: "add john@example.com, jane@company.org"', 'assistant');
-        return;
-    }
+    if (!action) return;
     
     try {
-        const contactsToAdd = emails.map(email => ({
-            email: email,
-            source: 'AI Added',
-            name: email.split('@')[0],
-            verified: false
-        }));
+        addChatMessage('📊 Processing contact management request...', 'assistant', 'typing');
         
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contactsToAdd })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            appState.contacts.push(...contactsToAdd);
-            updateContactCounter();
-            addChatMessage(`✅ **Added ${emails.length} contacts successfully!**\n\n${emails.map(e => `• ${e}`).join('\n')}\n\nTotal contacts: ${appState.contacts.length}`, 'assistant');
-        } else {
-            throw new Error('Backend error');
+        if (action.action === 'add') {
+            // Extract email from message
+            const emailMatch = message.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+            if (emailMatch) {
+                const email = emailMatch[0];
+                const name = message.replace(emailMatch[0], '').replace(/add contact|new contact|add.*email/gi, '').trim() || 'Unknown';
+                
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name })
+                });
+                
+                const data = await response.json();
+                removeChatMessage('typing');
+                
+                if (data.success) {
+                    appState.contacts = data.contacts;
+                    updateContactCounter();
+                    addChatMessage(`✅ Added contact: ${name} (${email})\n📊 Total contacts: ${appState.contacts.length}`, 'assistant');
+                } else {
+                    addChatMessage(`❌ Failed to add contact: ${data.error}`, 'assistant');
+                }
+            } else {
+                removeChatMessage('typing');
+                addChatMessage('❌ Please provide a valid email address (e.g., "Add contact John john@example.com")', 'assistant');
+            }
         }
+        else if (action.action === 'list') {
+            removeChatMessage('typing');
+            if (appState.contacts.length === 0) {
+                addChatMessage('📋 No contacts in database. Add some contacts to get started!', 'assistant');
+            } else {
+                const contactList = appState.contacts.slice(0, 10).map((contact, index) => 
+                    `${index + 1}. ${contact.name} (${contact.email})`
+                ).join('\n');
+                const remaining = appState.contacts.length > 10 ? `\n... and ${appState.contacts.length - 10} more` : '';
+                addChatMessage(`📊 **Contact Database (${appState.contacts.length} total):**\n\n${contactList}${remaining}`, 'assistant');
+            }
+        }
+        else if (action.action === 'clear') {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts/clear`, { method: 'DELETE' });
+            const data = await response.json();
+            removeChatMessage('typing');
+            
+            if (data.success) {
+                appState.contacts = [];
+                updateContactCounter();
+                addChatMessage('🗑️ All contacts cleared from database', 'assistant');
+            } else {
+                addChatMessage(`❌ Failed to clear contacts: ${data.error}`, 'assistant');
+            }
+        }
+        
     } catch (error) {
-        addChatMessage(`⚠️ **Added ${emails.length} contacts locally**\n\n${emails.map(e => `• ${e}`).join('\n')}\n\n*(Backend connection failed)*`, 'assistant');
+        console.error('❌ Contact management error:', error);
+        removeChatMessage('typing');
+        addChatMessage('❌ Error processing contact management request. Please try again.', 'assistant');
     }
-}
-
-// Handle Delete Contacts  
-async function handleDeleteContacts(message) {
-    const emails = extractEmailsFromText(message);
-    
-    if (emails.length > 0) {
-        // Delete specific emails
-        const deleted = emails.filter(email => 
-            appState.contacts.some(c => c.email === email)
-        );
-        
-        appState.contacts = appState.contacts.filter(c => 
-            !emails.includes(c.email)
-        );
-        
-        updateContactCounter();
-        addChatMessage(`✅ **Deleted ${deleted.length} contacts**\n\n${deleted.map(e => `• ${e}`).join('\n')}\n\nRemaining: ${appState.contacts.length}`, 'assistant');
-    } else if (message.toLowerCase().match(/all|everything/)) {
-        const count = appState.contacts.length;
-        appState.contacts = [];
-        updateContactCounter();
-        addChatMessage(`✅ **Deleted all ${count} contacts** from database`, 'assistant');
-    } else {
-        addChatMessage('❌ **Specify emails to delete**\n\nTry: "delete john@example.com" or "delete all"', 'assistant');
-    }
-}
-
-// Handle Search Contacts
-async function handleSearchContacts(message) {
-    if (appState.contacts.length === 0) {
-        addChatMessage('📭 **No contacts found**\n\nTry scraping a website or adding emails manually!', 'assistant');
-        return;
-    }
-    
-    const contactList = appState.contacts.slice(0, 10).map((contact, i) => 
-        `${i+1}. ${contact.email} (${contact.source})`
-    ).join('\n');
-    
-    let response = `📊 **Your Contacts (${appState.contacts.length} total)**\n\n${contactList}`;
-    if (appState.contacts.length > 10) {
-        response += `\n\n...and ${appState.contacts.length - 10} more contacts.`;
-    }
-    
-    addChatMessage(response, 'assistant');
 }
 
 // Handle Email Sending
 async function handleEmailSending(message) {
-    if (appState.contacts.length === 0) {
-        addChatMessage('📭 **No contacts to send to**\n\nFirst add contacts or scrape a website!', 'assistant');
-        return;
-    }
-    
     try {
-        addChatMessage('📤 **Sending emails...**', 'assistant', 'sending');
+        addChatMessage('📧 Processing email sending request...', 'assistant', 'typing');
         
-        let sent = 0;
-        const toSend = appState.contacts.slice(0, 30); // Limit
-        
-        for (const contact of toSend) {
-            try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/api/emails/send`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: contact.email,
-                        name: contact.name || contact.email.split('@')[0],
-                        company: contact.company || contact.email.split('@')[1].split('.')[0]
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.success) sent++;
-            } catch (error) {
-                console.error('Send error:', error);
-            }
+        if (appState.contacts.length === 0) {
+            removeChatMessage('typing');
+            addChatMessage('❌ No contacts available for sending emails. Please add contacts first.', 'assistant');
+            return;
         }
         
-        removeChatMessage('sending');
-        addChatMessage(`✅ **Sent ${sent} emails successfully!**\n\nEmails were sent using Gmail API + SendGrid fallback\n\nSent to first ${toSend.length} contacts (daily limit: 30)`, 'assistant');
+        // Use default template or extract from message
+        const emailData = {
+            subject: appState.emailTemplate.subject || 'Important Business Opportunity',
+            body: appState.emailTemplate.body || message.replace(/send email|send to|email all|send all/gi, '').trim() || 'Professional email sent via DaddyFreud AI system.'
+        };
+        
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(emailData)
+        });
+        
+        const data = await response.json();
+        removeChatMessage('typing');
+        
+        if (data.success) {
+            addChatMessage(`✅ Email sent successfully to ${data.sentCount} contacts!\n📊 Subject: ${emailData.subject}`, 'assistant');
+            
+            // Update sent emails tracker
+            appState.sentEmails.push({
+                timestamp: new Date(),
+                subject: emailData.subject,
+                body: emailData.body,
+                recipients: data.sentCount
+            });
+        } else {
+            addChatMessage(`❌ Email sending failed: ${data.error}`, 'assistant');
+        }
         
     } catch (error) {
-        removeChatMessage('sending');
-        addChatMessage('❌ **Email sending failed**\n\nBackend connection error. Please try again.', 'assistant');
+        console.error('❌ Email sending error:', error);
+        removeChatMessage('typing');
+        addChatMessage('❌ Error sending emails. Please try again.', 'assistant');
     }
+}
+
+// Check if input is URL
+function isUrlInput(input) {
+    return /^https?:\/\/[^\s]+/.test(input.trim());
 }
 
 // Handle Website Scraping
 async function handleScraping(url) {
     try {
-        addChatMessage('🕷️ **Scraping website...**', 'assistant', 'scraping');
+        addChatMessage('🕷️ Scraping website for email addresses...', 'assistant', 'typing');
         
-        const response = await fetch(`${CONFIG.API_BASE_URL}/scrape`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/scrape`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url })
         });
         
         const data = await response.json();
+        removeChatMessage('typing');
         
-        if (data.success && data.data.emails) {
-            const emails = data.data.emails;
-            
-            if (emails.length > 0) {
-                const contactsToAdd = emails.map(email => ({
-                    email: email,
-                    source: url,
-                    name: email.split('@')[0],
-                    verified: false
-                }));
+        if (data.success && data.emails.length > 0) {
+            // Add new contacts to database
+            for (const email of data.emails) {
+                const contactResponse = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name: email.split('@')[0] })
+                });
                 
-                // Save to backend
-                try {
-                    const saveResponse = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contactsToAdd })
-                    });
-                    
-                    if (saveResponse.ok) {
-                        appState.contacts.push(...contactsToAdd);
-                        updateContactCounter();
+                if (contactResponse.ok) {
+                    const contactData = await contactResponse.json();
+                    if (contactData.success) {
+                        appState.contacts = contactData.contacts;
                     }
-                } catch (saveError) {
-                    console.error('Save error:', saveError);
                 }
-                
-                removeChatMessage('scraping');
-                addChatMessage(`✅ **Found ${emails.length} emails from ${url}**\n\n${emails.slice(0, 5).map(e => `• ${e}`).join('\n')}${emails.length > 5 ? `\n\n...and ${emails.length - 5} more emails` : ''}\n\nTotal contacts: ${appState.contacts.length}`, 'assistant');
-            } else {
-                removeChatMessage('scraping');
-                addChatMessage(`⚠️ **No emails found** on ${url}\n\nTry a different website with contact information.`, 'assistant');
             }
+            
+            updateContactCounter();
+            addChatMessage(`✅ Scraped ${data.emails.length} email addresses from ${url}\n📊 Total contacts: ${appState.contacts.length}`, 'assistant');
         } else {
-            throw new Error('Scraping failed');
+            addChatMessage(`❌ No emails found or scraping failed: ${data.error || 'Unknown error'}`, 'assistant');
         }
+        
     } catch (error) {
-        removeChatMessage('scraping');
-        addChatMessage(`❌ **Scraping failed** for ${url}\n\nThe website might be inaccessible or have no emails.`, 'assistant');
+        console.error('❌ Scraping error:', error);
+        removeChatMessage('typing');
+        addChatMessage('❌ Error scraping website. Please check the URL and try again.', 'assistant');
     }
 }
 
-// Utility Functions
-function isUrlInput(text) {
-    // Only treat as URL if it starts with http/https or www, or looks like a domain (no spaces, starts with domain pattern)
-    return text.match(/^(https?:\/\/|www\.)/i) || 
-           (text.match(/^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$/i) && !text.includes('@'));
-}
-
-function extractEmailsFromText(text) {
-    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-    return text.match(emailRegex) || [];
-}
-
+// Format Markdown
 function formatMarkdown(text) {
+    if (!text) return '';
+    
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br>');
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>')
+        .replace(/#{3}\s*(.*?)$/gm, '<h3>$1</h3>')
+        .replace(/#{2}\s*(.*?)$/gm, '<h2>$1</h2>')
+        .replace(/#{1}\s*(.*?)$/gm, '<h1>$1</h1>')
+        .replace(/^• (.*?)$/gm, '<li>$1</li>')
+        .replace(/^- (.*?)$/gm, '<li>$1</li>');
 }
 
-function updateContactCounter() {
-    document.getElementById('contactCount').textContent = appState.contacts.length;
+// Detect Emotion in text
+function detectEmotion(text) {
+    const words = text.toLowerCase().split(/\s+/);
+    const emotions = {
+        excitement: 0,
+        frustration: 0,
+        curiosity: 0,
+        confusion: 0,
+        satisfaction: 0
+    };
+    
+    // Excitement indicators
+    const excitementWords = ['amazing', 'awesome', 'fantastic', 'great', 'excellent', 'perfect', 'love', '!'];
+    const frustrationWords = ['error', 'problem', 'issue', 'wrong', 'failed', 'broken', 'bug', 'not working'];
+    const curiosityWords = ['how', 'what', 'why', 'when', 'where', 'curious', 'wonder', '?'];
+    const confusionWords = ['confused', 'unclear', 'understand', 'explain', 'help', 'lost'];
+    const satisfactionWords = ['thanks', 'good', 'works', 'success', 'done', 'complete'];
+    
+    words.forEach(word => {
+        if (excitementWords.some(ew => word.includes(ew))) emotions.excitement += 0.2;
+        if (frustrationWords.some(fw => word.includes(fw))) emotions.frustration += 0.3;
+        if (curiosityWords.some(cw => word.includes(cw))) emotions.curiosity += 0.2;
+        if (confusionWords.some(cf => word.includes(cf))) emotions.confusion += 0.2;
+        if (satisfactionWords.some(sw => word.includes(sw))) emotions.satisfaction += 0.2;
+    });
+    
+    // Normalize values
+    Object.keys(emotions).forEach(key => {
+        emotions[key] = Math.min(1.0, emotions[key]);
+    });
+    
+    return emotions;
 }
 
-function showContactsSummary() {
-    if (appState.contacts.length === 0) {
-        addChatMessage('📭 **No contacts yet**\n\nTry scraping a website or adding emails manually!', 'assistant');
-    } else {
-        addChatMessage(`📊 **Database Summary**\n\nTotal contacts: ${appState.contacts.length}\nSources: ${[...new Set(appState.contacts.map(c => c.source))].join(', ')}\n\nSay "show all contacts" to see the full list!`, 'assistant');
-    }
+// Extract Key Topics
+function extractKeyTopics(text) {
+    const words = text.toLowerCase().split(/\s+/);
+    const topics = [];
+    
+    const topicKeywords = {
+        'email': ['email', 'mail', 'send', 'message'],
+        'business': ['business', 'company', 'corporate', 'enterprise'],
+        'psychology': ['psychology', 'unconscious', 'freud', 'analysis', 'therapy'],
+        'politics': ['orban', 'viktor', 'political', 'government', 'minister'],
+        'technology': ['ai', 'automation', 'software', 'system', 'tech'],
+        'marketing': ['marketing', 'campaign', 'outreach', 'prospects', 'sales']
+    };
+    
+    Object.keys(topicKeywords).forEach(topic => {
+        if (topicKeywords[topic].some(keyword => words.includes(keyword))) {
+            topics.push(topic);
+        }
+    });
+    
+    return topics;
 }
 
 // Load Data from Backend
@@ -531,157 +993,36 @@ async function loadDataFromBackend() {
         if (data.success) {
             appState.contacts = data.contacts || [];
             updateContactCounter();
+            console.log(`📊 Loaded ${appState.contacts.length} contacts from backend`);
         }
     } catch (error) {
-        console.error('Failed to load contacts:', error);
+        console.log('⚠️ Could not load data from backend (running in standalone mode)');
+        appState.contacts = [];
     }
-}
-
-// Show Toast
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
-    
-    toastMessage.textContent = message;
-    toast.className = `toast ${type} show`;
-    
-    setTimeout(() => {
-        toast.className = 'toast';
-    }, 3000);
 }
 
 // Test AI Connection
 async function testAIConnection() {
-    try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Email Manager AI Test'
-            },
-            body: JSON.stringify({
-                model: 'meta-llama/llama-3.1-8b-instruct:free',
-                messages: [{ role: 'user', content: 'Hello' }],
-                max_tokens: 10
-            })
-        });
-        
-        if (response.ok) {
-            updateAIStatus('online');
-            console.log('✅ AI API connected successfully');
-        } else {
-            updateAIStatus('offline');
-            console.log('❌ AI API connection failed:', response.status);
-        }
-    } catch (error) {
-        updateAIStatus('offline');
-        console.log('❌ AI API test failed:', error.message);
-    }
-}
-
-// Update AI Status Indicator
-function updateAIStatus(status) {
-    const aiStatus = document.getElementById('aiStatus');
-    if (aiStatus) {
-        aiStatus.className = `ai-status ${status}`;
-        aiStatus.title = status === 'online' ? 'AI Assistant Online' : 'AI Assistant Offline (using fallback)';
-    }
-}
-
-// Gmail Setup Functions
-function showGmailSetup() {
-    const modal = document.getElementById('gmailSetupModal');
-    modal.classList.add('show');
-    checkGmailStatus();
-}
-
-function closeGmailSetup() {
-    const modal = document.getElementById('gmailSetupModal');
-    modal.classList.remove('show');
-}
-
-async function checkGmailStatus() {
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/gmail/status`);
-        const data = await response.json();
-        
-        const statusElement = document.getElementById('gmailStatus');
-        const iconElement = document.getElementById('gmailStatusIcon');
-        
-        if (data.configured) {
-            statusElement.textContent = 'Connected & Ready (1B emails/day)';
-            iconElement.textContent = '✅';
-        } else {
-            statusElement.textContent = 'Not configured';
-            iconElement.textContent = '❌';
-        }
-    } catch (error) {
-        console.error('Error checking Gmail status:', error);
-    }
-}
-
-function authorizeGmail() {
-    // Construct OAuth URL with custom domain redirect URI
-    const clientId = '719606342223-u78m9p969615hkv03d7jid4l5352uiqb.apps.googleusercontent.com';
-    const redirectUri = 'https://www.daddyfreud.com/auth/google/callback';
-    const scope = 'https://www.googleapis.com/auth/gmail.send';
-    
-    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `response_type=code&` +
-        `access_type=offline&` +
-        `prompt=consent`;
-    
-    // Open OAuth window
-    window.open(oauthUrl, 'gmail-oauth', 'width=500,height=600');
-    
-    // Show authorization code input
-    document.getElementById('authCodeSection').style.display = 'block';
-    document.getElementById('authorizeBtn').textContent = '🔄 Authorization in progress...';
-    document.getElementById('authorizeBtn').disabled = true;
-    
-    addChatMessage(`🔐 **Gmail Authorization Started**\n\nA popup window has opened for Google OAuth. After granting permissions, copy the authorization code from the redirect URL and paste it in the setup modal.\n\n**Current redirect URI:** ${redirectUri}`, 'assistant');
-}
-
-async function completeGmailSetup() {
-    const authCode = document.getElementById('authCodeInput').value.trim();
-    
-    if (!authCode) {
-        showToast('Please enter the authorization code', 'error');
+    if (!CONFIG.AI_ENABLED) {
+        console.log('🤖 AI system disabled in config');
         return;
     }
     
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/gmail/setup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ authCode })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast('Gmail API configured successfully!', 'success');
-            addChatMessage('✅ **Gmail API Setup Complete!**\n\nYou now have access to unlimited email sending (1 billion emails/day) through Gmail API. The system will automatically use Gmail for all email sending.', 'assistant');
-            closeGmailSetup();
-            checkGmailStatus();
-        } else {
-            showToast(`Setup failed: ${data.error}`, 'error');
-        }
-    } catch (error) {
-        showToast('Setup failed: Network error', 'error');
-        console.error('Gmail setup error:', error);
-    }
+    console.log('🧠 Testing Freud\'s Soul consciousness connection...');
+    // AI connection will be tested on first user interaction
 }
 
-// Close modal when clicking outside
-document.addEventListener('click', (e) => {
-    const modal = document.getElementById('gmailSetupModal');
-    if (e.target === modal) {
-        closeGmailSetup();
+// Check Authentication Status
+function checkAuthStatus() {
+    // Placeholder for future authentication system
+    appState.isAuthenticated = true;
+    console.log('🔐 Authentication check complete');
+}
+
+// Update Contact Counter
+function updateContactCounter() {
+    const counter = document.getElementById('contactCounter');
+    if (counter) {
+        counter.textContent = appState.contacts.length;
     }
-}); 
+}
