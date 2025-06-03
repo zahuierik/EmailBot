@@ -4,7 +4,7 @@ const CONFIG = {
     IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
     API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://emailbot-f71m.onrender.com',
     // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
-    OPENROUTER_API_KEY: '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', // Current key shows 401 "No auth credentials found" - Generate new at https://openrouter.ai/keys
+    OPENROUTER_API_KEY: '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',
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
     AI_ENABLED: true
