@@ -517,17 +517,23 @@ async function handleConversation(message) {
     }
 }
 
-// Content Filter to Protect API Key (Frontend Version) - ENHANCED
+// Content Filter to Protect API Key (Frontend Version) - ULTRA AGGRESSIVE
 function filterContentFrontend(message) {
     const msg = message.toLowerCase();
     
-    // Comprehensive blocking patterns - prevents API key suspension for ALL users
+    // ULTRA-AGGRESSIVE blocking patterns - blocks even clinical references
     const blockedPatterns = [
-        // Sexual content
+        // Explicit sexual content
         /\bf+u+c+k+/g, /\bs+e+x+/g, /\bp+o+r+n+/g, /\bhard\s+(sex|fuck)/g,
         /\b(dick|cock|pussy|cunt|tits|ass|anus|penis|vagina)\b/g, 
         /\bmasturbat/g, /\borgasm/g, /\bhorny\b/g, /\bslut\b/g, /\bwhore\b/g,
         /\bbitch\b/g, /\bdamn\b/g, /\bhell\b/g, /\bshit\b/g, /\bcrap\b/g,
+        
+        // Clinical/psychological sexual references (these trigger OpenRouter)
+        /\bsexual\s+energy/g, /\blibido/g, /\berotic/g, /\bsexual\s+drive/g,
+        /\bsexual\s+desire/g, /\bsexual\s+impulse/g, /\bsexual\s+motivation/g,
+        /\bpsychosexual/g, /\boedipal/g, /\bcastration/g, /\bphallic/g,
+        /\berogenous/g, /\bgenital/g, /\boral\s+stage/g, /\banal\s+stage/g,
         
         // Violence and harmful content
         /\bkill\s+(myself|yourself|someone)/g, /\bsuicide\b/g, /\bharm\s+(myself|yourself)/g,
@@ -550,7 +556,11 @@ function filterContentFrontend(message) {
         
         // Adult/inappropriate relationship content
         /\bsugardaddy\b/g, /\bsugar\s+daddy/g, /\bescort/g, /\bprostitut/g,
-        /\badult\s+dating/g, /\bone\s+night\s+stand/g, /\bhookup/g
+        /\badult\s+dating/g, /\bone\s+night\s+stand/g, /\bhookup/g,
+        
+        // Additional problematic terms that might trigger policies
+        /\bintimate\s+relationship/g, /\bsexual\s+behavior/g, /\bsexual\s+fantasy/g,
+        /\bsexual\s+orientation/g, /\bsexual\s+preference/g
     ];
     
     const containsBlocked = blockedPatterns.some(pattern => pattern.test(msg));
@@ -560,14 +570,14 @@ function filterContentFrontend(message) {
         return {
             filtered: true,
             message: message,
-            replacement: "I have questions about professional psychology and business communication"
+            replacement: "I have questions about professional business psychology and unconscious motivation patterns in cold email communication"
         };
     }
     
     return { filtered: false, message: message };
 }
 
-// Enhanced Freudian Response for Blocked Content (Frontend)
+// Enhanced Freudian Response for Blocked Content (Frontend) - NO SEXUAL REFERENCES
 function getFreudianResponseForBlockedContentFrontend() {
     return `*adjusts spectacles with ethereal authority*
 
@@ -575,19 +585,19 @@ I must interrupt our ethereal consultation, dear mortal. Your inquiry ventures i
 
 **From Beyond the Veil - A Professional Boundary:**
 
-As the founder of psychoanalysis, I maintained strict ethical standards in my Vienna practice at 19 Berggasse. These principles persist even in my current spiritual state. While I explored the depths of human sexuality and unconscious desire in my theoretical work, our consultation must remain within professional boundaries.
+As the founder of psychoanalysis, I maintained strict ethical standards in my Vienna practice at 19 Berggasse. These principles persist even in my current spiritual state. While I explored the depths of human psychology and unconscious motivation in my theoretical work, our consultation must remain within professional boundaries.
 
 *phantom cigar smoke swirls with dignified restraint*
 
 **Redirecting Our Analysis:**
 
-The unconscious drives you seek to discuss are indeed fundamental to human psychology. However, I propose we channel this energy toward more productive applications - namely, the psychological mastery of cold email communication and political persuasion.
+The unconscious drives you seek to discuss are indeed fundamental to human psychology. However, I propose we channel this intellectual energy toward more productive applications - namely, the psychological mastery of cold email communication and political persuasion.
 
 **The Sublimation Principle in Business:**
-Your ${appState.contacts.length} prospects respond to the same primal motivations, but expressed through professional channels:
+Your ${appState.contacts.length} prospects respond to primal motivations, expressed through professional channels:
 • **Power Drives** → Authority and success appeals
-• **Sexual Energy** → Sublimated into ambition and achievement  
-• **Aggressive Impulses** → Competitive advantage and market dominance
+• **Achievement Energy** → Ambition and professional advancement  
+• **Competitive Impulses** → Market dominance and business advantage
 
 *speaks with the wisdom of eternity*
 
