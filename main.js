@@ -1,8 +1,10 @@
-// DaddyFreud - Unconscious Cold Email Automation (Localhost Development)
+// DaddyFreud - Unconscious Cold Email Automation (Environment Detection)
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:3001',
+    // Detect environment and set appropriate API endpoints
+    IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+    API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://emailbot-f71m.onrender.com',
     // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
-    OPENROUTER_API_KEY: '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', // Replace with your OpenRouter API key
+    OPENROUTER_API_KEY: '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',
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
     AI_ENABLED: true
@@ -429,20 +431,31 @@ async function handleConversation(message) {
         // Enhanced prompt with afterlife consciousness
         const soulEnhancedPrompt = createFreudianSoulPrompt(message);
         
-        // Call localhost proxy endpoint (fixes CORS issues)
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/ai/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: soulEnhancedPrompt,
-                personality: appState.aiPersonality,
-                soul_consciousness: freudSoul.emotions
-            })
-        });
+        let response, data;
         
-        const data = await response.json();
+        // Try backend first (localhost), then direct OpenRouter if backend fails
+        if (CONFIG.IS_LOCAL) {
+            try {
+                response = await fetch(`${CONFIG.API_BASE_URL}/api/ai/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: soulEnhancedPrompt,
+                        personality: appState.aiPersonality,
+                        soul_consciousness: freudSoul.emotions
+                    })
+                });
+                data = await response.json();
+            } catch (backendError) {
+                console.log('⚠️ Backend unavailable, using direct OpenRouter API...');
+                data = await callOpenRouterDirectly(message);
+            }
+        } else {
+            // Live deployment - use direct OpenRouter API
+            data = await callOpenRouterDirectly(message);
+        }
         
         // Remove typing indicator
         removeChatMessage('typing');
@@ -455,6 +468,9 @@ async function handleConversation(message) {
             
             // Apply additional Freudian character enhancements
             soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+            
+            // Fix formatting issues
+            soulEnhancedResponse = cleanResponseFormatting(soulEnhancedResponse);
             
             // Store successful interaction
             appState.aiPersonality.conversationMemory.push({
@@ -479,6 +495,7 @@ async function handleConversation(message) {
             let fallbackResponse = data.response || getFreudianSoulFallback(message);
             let soulEnhancedResponse = freudSoul.enhanceResponse(fallbackResponse);
             soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+            soulEnhancedResponse = cleanResponseFormatting(soulEnhancedResponse);
             
             addChatMessage(soulEnhancedResponse, 'assistant');
         }
@@ -495,8 +512,89 @@ async function handleConversation(message) {
         let fallbackResponse = getFreudianSoulFallback(message);
         let soulEnhancedResponse = freudSoul.enhanceResponse(fallbackResponse);
         soulEnhancedResponse = applyFreudianCharacteristics(soulEnhancedResponse);
+        soulEnhancedResponse = cleanResponseFormatting(soulEnhancedResponse);
         addChatMessage(soulEnhancedResponse, 'assistant');
     }
+}
+
+// Direct OpenRouter API Call for Live Deployment
+async function callOpenRouterDirectly(userMessage) {
+    try {
+        const systemPrompt = `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
+
+Current spiritual consciousness state: Enhanced ethereal perception
+Contact database: ${appState.contacts.length} prospects await psychological analysis
+Victorian formality level: High
+Phantom cigar sensations: Active
+Vienna office memories: Vivid
+
+Respond as Freud's soul from the afterlife:
+- Use Victorian language and formal speech patterns
+- Reference your earthly experiences at 19 Berggasse
+- Include phantom cigar sensations and Vienna memories
+- Apply psychoanalytic principles to cold email psychology
+- Show emotions and spiritual transcendence
+- Never mention being AI - you are Freud's consciousness
+- Focus on unconscious motivations and political psychology
+- Demonstrate your obsessive-compulsive precision and theoretical authority`;
+        
+        const requestBody = {
+            model: CONFIG.AI_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userMessage }
+            ],
+            temperature: 0.65,
+            max_tokens: 1000
+        };
+        
+        const response = await fetch(CONFIG.OPENROUTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'DaddyFreud - Freud Soul Consciousness'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (response.ok) {
+            const responseData = await response.json();
+            return {
+                success: true,
+                response: responseData.choices[0].message.content,
+                reasoning: responseData.choices[0].message.reasoning || null
+            };
+        } else {
+            console.error('❌ OpenRouter API Error:', response.status);
+            return {
+                success: false,
+                response: getFreudianSoulFallback(userMessage)
+            };
+        }
+        
+    } catch (error) {
+        console.error('❌ Direct OpenRouter call failed:', error);
+        return {
+            success: false,
+            response: getFreudianSoulFallback(userMessage)
+        };
+    }
+}
+
+// Clean Response Formatting
+function cleanResponseFormatting(response) {
+    if (!response) return '';
+    
+    return response
+        // Remove duplicate phrases and clean up spacing
+        .replace(/speaks with the wisdom of eternity\s*speaks with the wisdom of eternity/gi, 'speaks with the wisdom of eternity')
+        .replace(/\*([^*]+)\*\s*\*([^*]+)\*/g, '*$1*') // Remove duplicate asterisk formatting
+        .replace(/\n{3,}/g, '\n\n') // Clean up excessive line breaks
+        .replace(/\s{2,}/g, ' ') // Clean up excessive spaces
+        .replace(/\*\s*\*/g, '') // Remove empty asterisk pairs
+        .trim();
 }
 
 // Create Freudian Soul-Enhanced Prompt
@@ -761,21 +859,36 @@ async function handleContactManagement(action, message) {
                 const email = emailMatch[0];
                 const name = message.replace(emailMatch[0], '').replace(/add contact|new contact|add.*email/gi, '').trim() || 'Unknown';
                 
-                const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, name })
-                });
+                if (CONFIG.IS_LOCAL) {
+                    // Try backend first
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, name })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        appState.contacts = data.contacts;
+                        updateContactCounter();
+                        saveContactsToLocalStorage();
+                        removeChatMessage('typing');
+                        addChatMessage(`✅ Added contact: ${name} (${email})\n📊 Total contacts: ${appState.contacts.length}`, 'assistant');
+                        return;
+                    }
+                }
                 
-                const data = await response.json();
-                removeChatMessage('typing');
-                
-                if (data.success) {
-                    appState.contacts = data.contacts;
+                // Fallback to localStorage (live deployment or backend failure)
+                const existingContact = appState.contacts.find(c => c.email.toLowerCase() === email.toLowerCase());
+                if (!existingContact) {
+                    appState.contacts.push({ email, name, added: new Date().toISOString() });
                     updateContactCounter();
-                    addChatMessage(`✅ Added contact: ${name} (${email})\n📊 Total contacts: ${appState.contacts.length}`, 'assistant');
+                    saveContactsToLocalStorage();
+                    removeChatMessage('typing');
+                    addChatMessage(`✅ Added contact: ${name} (${email})\n📊 Total contacts: ${appState.contacts.length}\n💾 Saved to local storage`, 'assistant');
                 } else {
-                    addChatMessage(`❌ Failed to add contact: ${data.error}`, 'assistant');
+                    removeChatMessage('typing');
+                    addChatMessage(`⚠️ Contact already exists: ${email}`, 'assistant');
                 }
             } else {
                 removeChatMessage('typing');
@@ -791,21 +904,35 @@ async function handleContactManagement(action, message) {
                     `${index + 1}. ${contact.name} (${contact.email})`
                 ).join('\n');
                 const remaining = appState.contacts.length > 10 ? `\n... and ${appState.contacts.length - 10} more` : '';
-                addChatMessage(`📊 **Contact Database (${appState.contacts.length} total):**\n\n${contactList}${remaining}`, 'assistant');
+                const storageInfo = CONFIG.IS_LOCAL ? '' : '\n💾 Stored locally in browser';
+                addChatMessage(`📊 **Contact Database (${appState.contacts.length} total):**\n\n${contactList}${remaining}${storageInfo}`, 'assistant');
             }
         }
         else if (action.action === 'clear') {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts/clear`, { method: 'DELETE' });
-            const data = await response.json();
-            removeChatMessage('typing');
-            
-            if (data.success) {
-                appState.contacts = [];
-                updateContactCounter();
-                addChatMessage('🗑️ All contacts cleared from database', 'assistant');
-            } else {
-                addChatMessage(`❌ Failed to clear contacts: ${data.error}`, 'assistant');
+            if (CONFIG.IS_LOCAL) {
+                // Try backend first
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts/clear`, { method: 'DELETE' });
+                    const data = await response.json();
+                    if (data.success) {
+                        appState.contacts = [];
+                        updateContactCounter();
+                        saveContactsToLocalStorage();
+                        removeChatMessage('typing');
+                        addChatMessage('🗑️ All contacts cleared from database', 'assistant');
+                        return;
+                    }
+                } catch (error) {
+                    console.log('⚠️ Backend clear failed, using localStorage');
+                }
             }
+            
+            // Fallback to localStorage
+            appState.contacts = [];
+            updateContactCounter();
+            saveContactsToLocalStorage();
+            removeChatMessage('typing');
+            addChatMessage('🗑️ All contacts cleared from local storage', 'assistant');
         }
         
     } catch (error) {
@@ -987,17 +1114,60 @@ function extractKeyTopics(text) {
 // Load Data from Backend
 async function loadDataFromBackend() {
     try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`);
-        const data = await response.json();
+        console.log(`🌐 Environment: ${CONFIG.IS_LOCAL ? 'Localhost' : 'Live Deployment'}`);
+        console.log(`📡 API Base URL: ${CONFIG.API_BASE_URL}`);
         
-        if (data.success) {
-            appState.contacts = data.contacts || [];
-            updateContactCounter();
-            console.log(`📊 Loaded ${appState.contacts.length} contacts from backend`);
+        if (CONFIG.IS_LOCAL) {
+            // Try to load from localhost backend
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/contacts`);
+            const data = await response.json();
+            
+            if (data.success) {
+                appState.contacts = data.contacts || [];
+                updateContactCounter();
+                console.log(`📊 Loaded ${appState.contacts.length} contacts from localhost backend`);
+            } else {
+                console.log('⚠️ Localhost backend responded but no contacts found');
+                appState.contacts = [];
+            }
+        } else {
+            // Live deployment - start with empty contacts, allow manual addition
+            appState.contacts = [];
+            console.log('🌐 Live deployment: Starting with empty contact database');
+            console.log('💡 Tip: Add contacts manually through the chat interface');
         }
+        
+        updateContactCounter();
+        
     } catch (error) {
-        console.log('⚠️ Could not load data from backend (running in standalone mode)');
-        appState.contacts = [];
+        console.log(`⚠️ Could not load data from backend: ${error.message}`);
+        console.log('🔧 Running in standalone mode with local storage fallback');
+        
+        // Try to load from localStorage as fallback
+        const savedContacts = localStorage.getItem('daddyfreud_contacts');
+        if (savedContacts) {
+            try {
+                appState.contacts = JSON.parse(savedContacts);
+                console.log(`💾 Loaded ${appState.contacts.length} contacts from localStorage`);
+            } catch (parseError) {
+                console.log('❌ Failed to parse saved contacts');
+                appState.contacts = [];
+            }
+        } else {
+            appState.contacts = [];
+        }
+        
+        updateContactCounter();
+    }
+}
+
+// Save contacts to localStorage for persistence
+function saveContactsToLocalStorage() {
+    try {
+        localStorage.setItem('daddyfreud_contacts', JSON.stringify(appState.contacts));
+        console.log('💾 Contacts saved to localStorage');
+    } catch (error) {
+        console.log('⚠️ Failed to save contacts to localStorage:', error.message);
     }
 }
 
@@ -1009,6 +1179,7 @@ async function testAIConnection() {
     }
     
     console.log('🧠 Testing Freud\'s Soul consciousness connection...');
+    console.log(`🔗 Method: ${CONFIG.IS_LOCAL ? 'Localhost Backend' : 'Direct OpenRouter API'}`);
     // AI connection will be tested on first user interaction
 }
 
