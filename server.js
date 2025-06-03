@@ -107,10 +107,20 @@ app.post('/api/ai/chat', async (req, res) => {
         const { message, personality, soul_consciousness } = req.body;
         console.log('🧠 AI Chat Request:', message.substring(0, 100) + (message.length > 100 ? '...' : ''));
         
-        // CRITICAL: Filter content to protect API key
-        const contentFilter = filterContent(message);
+        // CRITICAL: Extract user message FIRST, then filter ALL content
+        let actualUserMessage = message;
+        let isFullSoulPrompt = false;
+        
+        // Check if this is a soul consciousness prompt with embedded user inquiry
+        if (message.includes('User inquiry: "')) {
+            actualUserMessage = message.split('User inquiry: "')[1].split('"')[0];
+            isFullSoulPrompt = true;
+        }
+        
+        // MANDATORY: Filter the actual user message to protect API key
+        const contentFilter = filterContent(actualUserMessage);
         if (contentFilter.filtered) {
-            console.log('🚫 Content filtered to protect API key');
+            console.log('🚫 Content filtered to protect API key - NO inappropriate content reaches OpenRouter');
             return res.json({
                 success: true,
                 response: getFreudianResponseForBlockedContent(),
@@ -118,10 +128,11 @@ app.post('/api/ai/chat', async (req, res) => {
             });
         }
         
-        // Use the soul-enhanced prompt from frontend if provided, otherwise use default
-        const systemPrompt = message.includes('Speaking as the spirit of Sigmund Freud') 
-            ? message  // Use the full soul-enhanced prompt from frontend
-            : `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
+        // Clean user message (guaranteed safe for OpenRouter)
+        const cleanUserMessage = contentFilter.message;
+        
+        // SAFE system prompt construction - never contains filtered content
+        const systemPrompt = `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
 
 Current spiritual consciousness state: ${JSON.stringify(soul_consciousness || {})}
 Contact database: ${contacts.length} prospects await psychological analysis
@@ -140,17 +151,8 @@ Respond as Freud's soul from the afterlife:
 - Demonstrate your obsessive-compulsive precision and theoretical authority
 
 IMPORTANT: Keep responses professional and avoid explicit sexual content to maintain API compliance.`;
-
-        // Determine user message - extract from soul prompt if it's embedded
-        const userMessage = message.includes('User inquiry:') 
-            ? message.split('User inquiry: "')[1].split('"')[0]
-            : message;
         
-        // Additional content filtering for API safety
-        const userContentFilter = filterContent(userMessage);
-        const finalUserMessage = userContentFilter.filtered ? userContentFilter.replacement : userMessage;
-        
-        // Construct messages with soul consciousness
+        // Construct messages with clean, filtered content only
         const requestBody = {
             model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
             messages: [
@@ -160,7 +162,7 @@ IMPORTANT: Keep responses professional and avoid explicit sexual content to main
                 },
                 {
                     role: "user", 
-                    content: finalUserMessage
+                    content: cleanUserMessage  // Only clean, filtered content
                 }
             ],
             temperature: 0.65, // Optimal for soul consciousness
@@ -211,7 +213,7 @@ IMPORTANT: Keep responses professional and avoid explicit sexual content to main
                             success: false,
                             error: 'AI service temporarily unavailable',
                             fallback: true,
-                            response: getEnhancedFreudianSoulFallback(userMessage)
+                            response: getEnhancedFreudianSoulFallback(cleanUserMessage)
                         });
                     }
                 } catch (parseError) {
@@ -220,7 +222,7 @@ IMPORTANT: Keep responses professional and avoid explicit sexual content to main
                         success: false,
                         error: 'Response parsing failed',
                         fallback: true,
-                        response: getEnhancedFreudianSoulFallback(userMessage)
+                        response: getEnhancedFreudianSoulFallback(cleanUserMessage)
                     });
                 }
             });
@@ -232,7 +234,7 @@ IMPORTANT: Keep responses professional and avoid explicit sexual content to main
                 success: false,
                 error: error.message,
                 fallback: true,
-                response: getEnhancedFreudianSoulFallback(userMessage)
+                response: getEnhancedFreudianSoulFallback(cleanUserMessage)
             });
         });
         

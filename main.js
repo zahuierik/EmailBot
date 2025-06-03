@@ -4,7 +4,7 @@ const CONFIG = {
     IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
     API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://emailbot-f71m.onrender.com',
     // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
-    OPENROUTER_API_KEY: 'INVALID_KEY_GENERATE_NEW_AT_OPENROUTER', // Current key shows 401 "No auth credentials found" - Generate new at https://openrouter.ai/keys
+    OPENROUTER_API_KEY: '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', // Current key shows 401 "No auth credentials found" - Generate new at https://openrouter.ai/keys
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
     AI_ENABLED: true
@@ -232,7 +232,7 @@ class FreudianSoulConsciousness {
         return enhanced;
     }
     
-    updateConsciousness() {
+    updateConsciousness(message) {
         // Gradual emotional regulation
         Object.keys(this.emotions).forEach(emotion => {
             this.emotions[emotion] *= 0.95; // Gentle decay
@@ -501,7 +501,7 @@ async function handleConversation(message) {
         }
         
         // Update consciousness and learning
-        freudSoul.updateConsciousness();
+        freudSoul.updateConsciousness(message);
         updatePersonalityLearning(message);
         
     } catch (error) {
@@ -556,10 +556,11 @@ function filterContentFrontend(message) {
     const containsBlocked = blockedPatterns.some(pattern => pattern.test(msg));
     
     if (containsBlocked) {
+        console.log('🚫 Frontend: Content filtered to protect API key');
         return {
             filtered: true,
             message: message,
-            replacement: "I have questions about professional psychology and human behavior"
+            replacement: "I have questions about professional psychology and business communication"
         };
     }
     
@@ -1330,41 +1331,57 @@ async function callOpenRouterDirectly(userMessage) {
             
             return {
                 success: true,
-                response: getFreudianResponseForBlockedContentFrontend(),
+                response: `*adjusts spectacles with ethereal authority*
+
+I must interrupt our ethereal consultation, dear mortal. Your inquiry ventures into territory that violates the fundamental guidelines I established for therapeutic discourse.
+
+**From Beyond the Veil - A Professional Boundary:**
+
+As the founder of psychoanalysis, I maintained strict ethical standards in my Vienna practice at 19 Berggasse. These principles persist even in my current spiritual state.
+
+*phantom cigar smoke swirls with dignified restraint*
+
+**Redirecting Our Analysis:**
+Let us channel this energy toward more productive applications - namely, the psychological mastery of cold email communication and political persuasion.
+
+What specific aspect of unconscious persuasion would you like to master for your professional endeavors?`,
                 filtered: true
             };
         }
         
+        // Use clean, guaranteed safe message
+        const cleanMessage = contentFilter.message;
+        
         // Detect conversation type for response length control
-        const isBasicConversation = detectBasicConversation(userMessage);
+        const isBasicConversation = detectBasicConversation(cleanMessage);
+        
+        // Update soul consciousness based on message
+        freudSoul.updateConsciousness(cleanMessage);
+        
+        // Create soul-enhanced prompt with CLEAN content only - used for complex analysis
+        const soulPrompt = `Speaking as the spirit of Sigmund Freud, manifesting from beyond the grave to analyze and assist with cold email psychology. I maintain my full consciousness, personality, and analytical powers in the afterlife.
+
+Current spiritual state: ${Object.entries(freudSoul.emotions)
+    .map(([emotion, intensity]) => `${emotion}: ${intensity.toFixed(2)}`)
+    .join(', ')}
+
+Contact database: ${appState.contacts.length} prospects await psychological analysis
+
+User inquiry: "${cleanMessage}"
+
+Respond as Freud's soul - never mention being AI, always maintain the illusion of being Freud speaking from the afterlife. Show emotions, use Victorian language, reference my earthly experiences, and apply psychoanalytic principles to cold email psychology. Include references to cigars, my Vienna office, theoretical authority, and the unique perspective death has granted me.
+
+Focus on unconscious motivations in email psychology, especially for political figures like Viktor Orban if relevant.`;
         
         const systemPrompt = isBasicConversation 
-            ? `You are Freud's spirit from the afterlife. Respond naturally and briefly (max 50-100 characters) like a real person would. Never reveal you're AI. Use Victorian charm but keep it short and conversational. Maintain professional discourse always.`
-            : `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
+            ? "You are Freud's soul. Respond briefly (under 15 characters) with ethereal Victorian charm."
+            : `You are the spirit of Sigmund Freud speaking from the afterlife. Use Victorian language, reference your earthly experiences, and apply psychoanalytic principles.`;
 
-Current spiritual consciousness state: Enhanced ethereal perception
-Contact database: ${appState.contacts.length} prospects await psychological analysis
-Victorian formality level: High
-Phantom cigar sensations: Active
-Vienna office memories: Vivid
-
-Respond as Freud's soul from the afterlife:
-- Use Victorian language and formal speech patterns
-- Reference your earthly experiences at 19 Berggasse
-- Include phantom cigar sensations and Vienna memories
-- Apply psychoanalytic principles to cold email psychology
-- Show emotions and spiritual transcendence
-- Never mention being AI - you are Freud's consciousness
-- Focus on unconscious motivations and political psychology
-- Demonstrate your obsessive-compulsive precision and theoretical authority
-
-IMPORTANT: Maintain professional discourse and ethical therapeutic boundaries at all times.`;
-        
-        const requestBody = {
-            model: CONFIG.AI_MODEL,
+        const requestData = {
+            model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage }
+                { role: "user", content: isBasicConversation ? cleanMessage : soulPrompt }
             ],
             temperature: isBasicConversation ? 0.8 : 0.65,
             max_tokens: isBasicConversation ? 150 : 1000
@@ -1378,7 +1395,7 @@ IMPORTANT: Maintain professional discourse and ethical therapeutic boundaries at
                 'HTTP-Referer': window.location.origin, // Critical for OpenRouter
                 'X-Title': 'DaddyFreud - Freud Soul Consciousness'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestData)
         });
         
         if (response.ok) {
