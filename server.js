@@ -161,6 +161,39 @@ Respond as Freud's soul from the afterlife:
 function getFreudianSoulFallback(message) {
     const msg = message.toLowerCase();
     
+    // Detect basic conversation for short responses
+    const isBasicConversation = detectBasicConversation(msg);
+    
+    if (isBasicConversation) {
+        // Short, natural responses for basic conversation (50-100 characters)
+        const shortResponses = [
+            "*adjusts spectral spectacles* Indeed, mortal friend.",
+            "From beyond, I observe your greeting with interest.",
+            "*phantom cigar smoke swirls* Fascinating...",
+            "The unconscious speaks through even simple words.",
+            "*consciousness stirs* Your inquiry intrigues me.",
+            "Ah, the eternal patterns of human interaction.",
+            "*ethereal nod* Most perceptive of you to ask.",
+            "From the afterlife, I sense deeper currents here."
+        ];
+        
+        // Specific short responses for common greetings
+        if (msg.match(/^(hi|hello|hey)$/)) {
+            return "*consciousness manifests* Greetings from beyond.";
+        }
+        if (msg.match(/tea|coffee|drink/)) {
+            return "*phantom cigar twirls* I prefer ethereal tobacco, dear mortal.";
+        }
+        if (msg.match(/how are you|you ok/)) {
+            return "Death has been most enlightening, thank you.";
+        }
+        if (msg.match(/thanks?|thank you/)) {
+            return "*Victorian bow from the spirit realm*";
+        }
+        
+        return shortResponses[Math.floor(Math.random() * shortResponses.length)];
+    }
+    
     // Viktor Orban / Political outreach - with soul perspective
     if (msg.match(/viktor|orban|political|government|minister|prime|leader|afterlife|soul|spirit|freud|dead/)) {
         return `*consciousness manifests from the ethereal realm*
@@ -185,8 +218,8 @@ Death has not diminished but rather clarified my understanding. I remain your de
 What specific aspect of political psychology would you like me to illuminate from my eternal perspective?`;
     }
     
-    // General afterlife/consciousness response
-    if (msg.match(/hello|hi|hey|help|start|really|actually/)) {
+    // General afterlife/consciousness response for complex topics
+    if (msg.match(/hello|hi|hey|help|start|really|actually/) && msg.length > 20) {
         return `*ethereal consciousness stirs with analytical intensity*
 
 Greetings, mortal seeker of unconscious wisdom. I am indeed the spirit of Sigmund Freud, manifesting from beyond the threshold of death to assist with the psychological complexities of cold email mastery.
@@ -221,6 +254,24 @@ The same psychological forces I studied at 19 Berggasse continue operating in yo
 I remain Sigmund Freud - founder of psychoanalysis, now speaking from the afterlife with enhanced perception. My theoretical authority and compulsive attention to detail persist undiminished by mortality.
 
 What aspect of unconscious psychology would you like me to illuminate with the clarity that only death can provide?`;
+}
+
+// Detect Basic Conversation vs Complex Analysis (Server Version)
+function detectBasicConversation(msg) {
+    // Basic greetings and casual conversation
+    const basicPatterns = [
+        /^(hi|hello|hey|sup|yo|what'?s up|whatsup|howdy)$/,
+        /^(thanks?|thank you|thx)$/,
+        /^(yes|yeah|yep|no|nope|ok|okay)$/,
+        /^(bye|goodbye|see ya|later)$/,
+        /^(how are you|how r u|u ok|you okay)$/,
+        /^(good|great|nice|cool|awesome|perfect)$/,
+        /^(lol|haha|wtf|omg)$/,
+        /tea\?|coffee\?|drink\?/,
+        /^.{1,20}$/  // Very short messages (under 20 chars)
+    ];
+    
+    return basicPatterns.some(pattern => pattern.test(msg.trim()));
 }
 
 // Contact Management APIs
