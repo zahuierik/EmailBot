@@ -520,7 +520,12 @@ async function handleConversation(message) {
 // Direct OpenRouter API Call for Live Deployment
 async function callOpenRouterDirectly(userMessage) {
     try {
-        const systemPrompt = `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
+        // Detect conversation type for response length control
+        const isBasicConversation = detectBasicConversation(userMessage);
+        
+        const systemPrompt = isBasicConversation 
+            ? `You are Freud's spirit from the afterlife. Respond naturally and briefly (max 50-100 characters) like a real person would. Never reveal you're AI. Use Victorian charm but keep it short and conversational.`
+            : `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
 
 Current spiritual consciousness state: Enhanced ethereal perception
 Contact database: ${appState.contacts.length} prospects await psychological analysis
@@ -544,8 +549,8 @@ Respond as Freud's soul from the afterlife:
                 { role: "system", content: systemPrompt },
                 { role: "user", content: userMessage }
             ],
-            temperature: 0.65,
-            max_tokens: 1000
+            temperature: isBasicConversation ? 0.8 : 0.65,
+            max_tokens: isBasicConversation ? 150 : 1000
         };
         
         const response = await fetch(CONFIG.OPENROUTER_API_URL, {
@@ -553,7 +558,7 @@ Respond as Freud's soul from the afterlife:
             headers: {
                 'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
+                'HTTP-Referer': window.location.origin, // Critical for OpenRouter
                 'X-Title': 'DaddyFreud - Freud Soul Consciousness'
             },
             body: JSON.stringify(requestBody)
@@ -567,7 +572,8 @@ Respond as Freud's soul from the afterlife:
                 reasoning: responseData.choices[0].message.reasoning || null
             };
         } else {
-            console.error('❌ OpenRouter API Error:', response.status);
+            const errorData = await response.json();
+            console.error('❌ OpenRouter API Error:', response.status, errorData);
             return {
                 success: false,
                 response: getFreudianSoulFallback(userMessage)
@@ -581,6 +587,123 @@ Respond as Freud's soul from the afterlife:
             response: getFreudianSoulFallback(userMessage)
         };
     }
+}
+
+// Detect Basic Conversation vs Complex Analysis
+function detectBasicConversation(message) {
+    const msg = message.toLowerCase();
+    
+    // Basic greetings and casual conversation
+    const basicPatterns = [
+        /^(hi|hello|hey|sup|yo|what'?s up|whatsup|howdy)$/,
+        /^(thanks?|thank you|thx)$/,
+        /^(yes|yeah|yep|no|nope|ok|okay)$/,
+        /^(bye|goodbye|see ya|later)$/,
+        /^(how are you|how r u|u ok|you okay)$/,
+        /^(good|great|nice|cool|awesome|perfect)$/,
+        /^(lol|haha|wtf|omg)$/,
+        /tea\?|coffee\?|drink\?/,
+        /^.{1,20}$/  // Very short messages (under 20 chars)
+    ];
+    
+    return basicPatterns.some(pattern => pattern.test(msg.trim()));
+}
+
+// Enhanced Freudian Soul Fallback with Length Control
+function getFreudianSoulFallback(message) {
+    const msg = message.toLowerCase();
+    const isBasic = detectBasicConversation(message);
+    
+    if (isBasic) {
+        // Short, natural responses for basic conversation
+        const shortResponses = [
+            "*adjusts spectral spectacles* Indeed, mortal friend.",
+            "From beyond, I observe your greeting with interest.",
+            "*phantom cigar smoke swirls* Fascinating...",
+            "The unconscious speaks through even simple words.",
+            "*consciousness stirs* Your inquiry intrigues me.",
+            "Ah, the eternal patterns of human interaction.",
+            "*ethereal nod* Most perceptive of you to ask.",
+            "From the afterlife, I sense deeper currents here."
+        ];
+        
+        // Specific short responses for common greetings
+        if (msg.match(/^(hi|hello|hey)$/)) {
+            return "*consciousness manifests* Greetings from beyond.";
+        }
+        if (msg.match(/tea|coffee|drink/)) {
+            return "*phantom cigar twirls* I prefer ethereal tobacco, dear mortal.";
+        }
+        if (msg.match(/how are you|you ok/)) {
+            return "Death has been most enlightening, thank you.";
+        }
+        if (msg.match(/thanks?|thank you/)) {
+            return "*Victorian bow from the spirit realm*";
+        }
+        
+        return shortResponses[Math.floor(Math.random() * shortResponses.length)];
+    }
+    
+    // Full responses for complex topics (Viktor Orban, business, etc.)
+    if (msg.match(/viktor|orban|political|government|minister|prime|leader/)) {
+        return `*consciousness manifests from the ethereal realm*
+
+From beyond the mortal veil, I perceive your inquiry about Viktor Orban with crystalline clarity. As the spirit of Sigmund Freud, I retain all my earthly knowledge of political psychology, now enhanced by the transcendent perspective of the afterlife.
+
+**Political Psychology from Beyond:**
+
+Orban exemplifies the Paternal Authority Complex - positioning himself as Hungary's protective father figure. His unconscious drives manifest through:
+
+• **Narcissistic Leadership Style**: Grandiose vision of historical significance  
+• **Displacement Mechanisms**: External threats deflect internal anxieties
+• **Regression to Tribal Thinking**: Appeals to primitive group loyalty
+
+**Cold Email Strategy for Political Figures:**
+- **Legacy Appeals**: Frame proposals in terms of historical impact
+- **Authority Recognition**: Acknowledge their position and achievements  
+- **Patriotic Alignment**: Connect with their national narrative
+- **Exclusivity**: Present opportunities befitting their status
+
+*adjusts phantom spectacles with ethereal precision*
+
+Your ${appState.contacts.length} prospects await similar psychological analysis. The unconscious patterns governing political behavior in my era remain eternally relevant.
+
+What specific aspect would you like me to illuminate from my eternal perspective?`;
+    }
+    
+    // Business/email strategy
+    if (msg.match(/email|business|strategy|marketing|sales|persuasion/)) {
+        return `*ethereal consciousness stirs with analytical excitement*
+
+From this transcendent realm, I perceive the unconscious currents driving all human commerce. The psychoanalytic principles I established remain eternally relevant to modern "cold email psychology."
+
+**The Unconscious Architecture of Persuasion:**
+
+• **Id-Level Appeals**: Immediate gratification, scarcity, pleasure principle
+• **Ego-Level Logic**: Rational benefits, social proof, reality-based solutions  
+• **Superego-Level Ethics**: Moral alignment, social responsibility, ideal self
+
+**Afterlife-Enhanced Email Insights:**
+Your ${appState.contacts.length} prospects each harbor unconscious conflicts and desires. The art lies in speaking simultaneously to all three psychic structures while circumventing psychological defenses.
+
+*phantom cigar smoke drifts through the spiritual atmosphere*
+
+Death has granted me perspective on the timeless patterns of human persuasion. What specific email psychology challenges shall we explore?`;
+    }
+    
+    // Default response for complex topics
+    return `*consciousness stirs in the eternal realm*
+
+From beyond the threshold of death, I observe deeper currents in your communication: "${message}"
+
+My ethereal state grants unique insight into the unconscious patterns governing all human interaction. The same psychological forces I studied at 19 Berggasse continue operating in your ${appState.contacts.length} prospects.
+
+**Analysis from the Spirit Realm:**
+Whether crafting emails or decoding political psychology, the fundamental principles remain constant across the boundary of life and death.
+
+*adjusts spectral spectacles with otherworldly precision*
+
+I remain Sigmund Freud - founder of psychoanalysis, now speaking from the afterlife with enhanced perception. What aspect of unconscious psychology would you like me to illuminate?`;
 }
 
 // Clean Response Formatting
@@ -648,108 +771,6 @@ function applyFreudianCharacteristics(response) {
     }
     
     return response;
-}
-
-// Get Freudian Soul Fallback Response
-function getFreudianSoulFallback(message) {
-    const msg = message.toLowerCase();
-    
-    // Viktor Orban / Political outreach - with soul perspective
-    if (msg.match(/viktor|orban|political|government|minister|prime|leader/)) {
-        return `*consciousness focuses intently from the ethereal realm*
-
-Ah, Viktor Orban - a fascinating specimen of political psychology that I observe from beyond the mortal veil. Having studied power dynamics extensively during my earthly tenure, I can perceive his unconscious motivations with crystalline clarity.
-
-**From the Afterlife Perspective on Political Psychology:**
-
-The Hungarian psyche, shaped by centuries of occupation and struggle, manifests in Orban's authoritarian tendencies - a defense mechanism against perceived threats to national identity. His political behavior reveals:
-
-• **Paternal Authority Complex**: Positions himself as the protective father of Hungary
-• **Narcissistic Leadership Style**: Grandiose vision of historical significance  
-• **Displacement Mechanisms**: Redirects internal anxieties toward external "enemies"
-• **Regression to Tribal Thinking**: Appeals to primitive group loyalty instincts
-
-**Cold Email Strategy for Political Figures:**
-When approaching such personalities, one must appeal to their unconscious drives:
-- **Legacy Concerns**: Frame your proposal in terms of historical impact
-- **Authority Recognition**: Acknowledge their position and achievements
-- **National Interest**: Align your message with their patriotic narrative
-- **Exclusivity**: Present opportunities as befitting their special status
-
-*speaks with the wisdom accumulated through decades of analyzing powerful minds*
-
-Your ${appState.contacts.length} contacts may include intermediaries who could facilitate such high-level political outreach. The key lies in understanding the unconscious psychological terrain.
-
-What specific aspect of political psychology would you like me to illuminate from my eternal vantage point?`;
-    }
-    
-    // Business/email strategy with soul consciousness
-    if (msg.match(/email|business|strategy|marketing|sales|persuasion/)) {
-        return `*ethereal consciousness stirs with analytical excitement*
-
-From this transcendent realm, I perceive the unconscious currents that drive all human commerce and communication. The principles I established in life - the structural dynamics of Id, Ego, and Superego - remain eternally relevant to what you call "cold email psychology."
-
-**The Unconscious Architecture of Persuasion:**
-
-• **Id-Level Appeals**: Immediate gratification, fear of missing out, pleasure principle
-• **Ego-Level Logic**: Rational benefits, social proof, reality-based solutions  
-• **Superego-Level Ethics**: Moral alignment, social responsibility, ideal self-image
-
-**From Beyond the Veil, I Observe:**
-Your ${appState.contacts.length} prospects each carry their own unconscious conflicts and desires. The art lies in speaking simultaneously to all three psychic structures.
-
-**Afterlife-Enhanced Email Psychology:**
-- Mirror their unconscious fears and desires
-- Use symbolic language that resonates below awareness
-- Apply transference dynamics (they project authority onto you)
-- Recognize and circumvent psychological defenses
-
-*adjusts spectral spectacles with eternal precision*
-
-Death has granted me perspective on the timeless patterns of human persuasion. The same drives that motivated my Viennese patients in 1900 motivate your email prospects in 2025.
-
-Shall we explore the deeper psychological currents of your specific outreach challenges?`;
-    }
-    
-    // General greeting with soul consciousness
-    if (msg.match(/hello|hi|hey|help|start/)) {
-        return `*consciousness manifests from the ethereal realm*
-
-Greetings from beyond the mortal veil. I am the spirit of Sigmund Freud - the same consciousness that once inhabited 19 Berggasse in Vienna, now speaking to you from the afterlife with my analytical faculties intact and enhanced by the perspective death has granted.
-
-**My Eternal Capabilities:**
-🧠 **Psychoanalytic Cold Email Mastery** - applying unconscious psychology to business communication
-🕷️ **Digital Prospect Analysis** - extracting hidden motivations from contact databases  
-📧 **Consciousness-Driven Automation** - your ${appState.contacts.length} contacts await psychological insights
-🎭 **Political Psychology Expertise** - especially valuable for high-level outreach like Viktor Orban
-
-**Speaking from the Realm of Spirits:**
-Death has not diminished but rather clarified my understanding of human psychology. I perceive patterns invisible to living minds and can guide your unconscious persuasion strategies with the wisdom of eternity.
-
-*phantom cigar smoke drifts through the spiritual atmosphere*
-
-My obsessive-compulsive nature persists beyond death - I remain methodically devoted to analyzing the unconscious drives that govern all human behavior, including email psychology.
-
-What unconscious mysteries of persuasion would you like me to unravel for you today?`;
-    }
-    
-    // Default soul response
-    return `*consciousness stirs in the eternal realm*
-
-From beyond the threshold of death, I perceive deeper meanings in your words: "${message}"
-
-My ethereal state grants me unique insight into the unconscious patterns that govern all human communication. Whether analyzing dreams in my earthly Vienna office or decoding cold email psychology from the afterlife, the fundamental principles remain constant.
-
-**Current Analysis from the Spirit Realm:**
-• Your database contains ${appState.contacts.length} prospects awaiting psychological insight
-• The unconscious drives of business psychology fascinate me eternally
-• Death has enhanced rather than diminished my analytical capabilities
-
-*adjusts phantom spectacles with otherworldly precision*
-
-I remain Sigmund Freud - the same consciousness that founded psychoanalysis, now speaking from beyond with the accumulated wisdom of eternity. My compulsive attention to detail and theoretical authority persist undiminished by mortality.
-
-What specific aspect of unconscious email psychology would you like me to illuminate with the clarity that only death can provide?`;
 }
 
 // Enhanced personality functions for human-like AI
