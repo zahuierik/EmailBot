@@ -11,7 +11,7 @@ let contacts = [];
 let emailTemplates = [];
 
 // OpenRouter Configuration
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = 'INVALID_KEY_GENERATE_NEW_AT_OPENROUTER'; // Current key shows 401 "No auth credentials found" - Generate new at https://openrouter.ai/keys
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Middleware with increased payload limits for CSV imports
