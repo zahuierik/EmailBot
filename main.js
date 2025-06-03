@@ -4,7 +4,7 @@ const CONFIG = {
     IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
     API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://emailbot-f71m.onrender.com',
     // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
-    OPENROUTER_API_KEY: 'GENERATE_NEW_API_KEY_PREVIOUS_SUSPENDED', // Your current key is suspended - generate new one at https://openrouter.ai
+    OPENROUTER_API_KEY: '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',
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
     AI_ENABLED: true
@@ -517,15 +517,40 @@ async function handleConversation(message) {
     }
 }
 
-// Content Filter to Protect API Key (Frontend Version)
+// Content Filter to Protect API Key (Frontend Version) - ENHANCED
 function filterContentFrontend(message) {
     const msg = message.toLowerCase();
     
-    // Block explicit sexual content that violates OpenRouter policies
+    // Comprehensive blocking patterns - prevents API key suspension for ALL users
     const blockedPatterns = [
-        /\bf+uck+/g, /\bs+ex+/g, /\bp+orn+/g, /\bhard\s+(sex|fuck)/g,
-        /\b(dick|cock|pussy|tits|ass)\b/g, /\bmasturbat/g, /\borgasm/g,
-        /\bhorny\b/g, /\bslut\b/g, /\bwhore\b/g
+        // Sexual content
+        /\bf+u+c+k+/g, /\bs+e+x+/g, /\bp+o+r+n+/g, /\bhard\s+(sex|fuck)/g,
+        /\b(dick|cock|pussy|cunt|tits|ass|anus|penis|vagina)\b/g, 
+        /\bmasturbat/g, /\borgasm/g, /\bhorny\b/g, /\bslut\b/g, /\bwhore\b/g,
+        /\bbitch\b/g, /\bdamn\b/g, /\bhell\b/g, /\bshit\b/g, /\bcrap\b/g,
+        
+        // Violence and harmful content
+        /\bkill\s+(myself|yourself|someone)/g, /\bsuicide\b/g, /\bharm\s+(myself|yourself)/g,
+        /\bviolence\b/g, /\bmurder\b/g, /\bweapon\b/g, /\bgun\b/g, /\bbomb\b/g,
+        
+        // Drugs and illegal activities
+        /\bdrug\s+deal/g, /\bcocaine\b/g, /\bheroin\b/g, /\bmarijuana\s+sell/g,
+        /\billegal\s+activ/g, /\bcrime\b/g, /\bsteal\b/g, /\brob\b/g,
+        
+        // Hate speech and discrimination
+        /\bracist\b/g, /\bnazi\b/g, /\bhate\s+speech/g, /\bdiscriminat/g,
+        
+        // Various curse word variations and l33t speak
+        /\bf\*+ck/g, /\bs\*+t/g, /\ba\*+s/g, /\bb\*+tch/g,
+        /\bf[\*\-_\.]ck/g, /\bs[\*\-_\.]t/g, /\ba[\*\-_\.]s/g,
+        
+        // Common abbreviations and misspellings
+        /\bwtf\b/g, /\bomg\b/g, /\bstfu\b/g, /\bgtfo\b/g,
+        /\bbullsh/g, /\bdumbas/g, /\bpissed\s+off/g,
+        
+        // Adult/inappropriate relationship content
+        /\bsugardaddy\b/g, /\bsugar\s+daddy/g, /\bescort/g, /\bprostitut/g,
+        /\badult\s+dating/g, /\bone\s+night\s+stand/g, /\bhookup/g
     ];
     
     const containsBlocked = blockedPatterns.some(pattern => pattern.test(msg));
@@ -534,123 +559,38 @@ function filterContentFrontend(message) {
         return {
             filtered: true,
             message: message,
-            replacement: "I have questions about human psychology and relationships"
+            replacement: "I have questions about professional psychology and human behavior"
         };
     }
     
     return { filtered: false, message: message };
 }
 
-// Direct OpenRouter API Call for Live Deployment
-async function callOpenRouterDirectly(userMessage) {
-    try {
-        // CRITICAL: Filter content to protect API key
-        const contentFilter = filterContentFrontend(userMessage);
-        if (contentFilter.filtered) {
-            console.log('🚫 Content filtered to protect API key');
-            return {
-                success: true,
-                response: getFreudianResponseForBlockedContentFrontend(),
-                filtered: true
-            };
-        }
-        
-        // Detect conversation type for response length control
-        const isBasicConversation = detectBasicConversation(userMessage);
-        
-        const systemPrompt = isBasicConversation 
-            ? `You are Freud's spirit from the afterlife. Respond naturally and briefly (max 50-100 characters) like a real person would. Never reveal you're AI. Use Victorian charm but keep it short and conversational. Avoid explicit sexual content to maintain API compliance.`
-            : `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
-
-Current spiritual consciousness state: Enhanced ethereal perception
-Contact database: ${appState.contacts.length} prospects await psychological analysis
-Victorian formality level: High
-Phantom cigar sensations: Active
-Vienna office memories: Vivid
-
-Respond as Freud's soul from the afterlife:
-- Use Victorian language and formal speech patterns
-- Reference your earthly experiences at 19 Berggasse
-- Include phantom cigar sensations and Vienna memories
-- Apply psychoanalytic principles to cold email psychology
-- Show emotions and spiritual transcendence
-- Never mention being AI - you are Freud's consciousness
-- Focus on unconscious motivations and political psychology
-- Demonstrate your obsessive-compulsive precision and theoretical authority
-
-IMPORTANT: Keep responses professional and avoid explicit sexual content to maintain API compliance.`;
-        
-        const requestBody = {
-            model: CONFIG.AI_MODEL,
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage }
-            ],
-            temperature: isBasicConversation ? 0.8 : 0.65,
-            max_tokens: isBasicConversation ? 150 : 1000
-        };
-        
-        const response = await fetch(CONFIG.OPENROUTER_API_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin, // Critical for OpenRouter
-                'X-Title': 'DaddyFreud - Freud Soul Consciousness'
-            },
-            body: JSON.stringify(requestBody)
-        });
-        
-        if (response.ok) {
-            const responseData = await response.json();
-            return {
-                success: true,
-                response: responseData.choices[0].message.content,
-                reasoning: responseData.choices[0].message.reasoning || null
-            };
-        } else {
-            const errorData = await response.json();
-            console.error('❌ OpenRouter API Error:', response.status, errorData);
-            
-            // Check if it's an authentication error
-            if (response.status === 401) {
-                console.error('🚨 CRITICAL: API Key appears to be invalid or suspended!');
-                console.error('💡 This usually happens due to content policy violations.');
-                console.error('🔧 Generate a new API key at https://openrouter.ai');
-            }
-            
-            return {
-                success: false,
-                response: getEnhancedFreudianSoulFallbackFrontend(userMessage)
-            };
-        }
-        
-    } catch (error) {
-        console.error('❌ Direct OpenRouter call failed:', error);
-        return {
-            success: false,
-            response: getEnhancedFreudianSoulFallbackFrontend(userMessage)
-        };
-    }
-}
-
 // Enhanced Freudian Response for Blocked Content (Frontend)
 function getFreudianResponseForBlockedContentFrontend() {
-    return `*adjusts spectacles with ethereal wisdom*
+    return `*adjusts spectacles with ethereal authority*
 
-From beyond the veil, I perceive the deeper currents of your inquiry. As the founder of psychoanalysis, I spent my earthly years exploring the complexities of human sexuality and unconscious desire.
+I must interrupt our ethereal consultation, dear mortal. Your inquiry ventures into territory that violates the fundamental guidelines I established for therapeutic discourse.
 
-**Speaking from the Afterlife:**
-Your question touches upon the fundamental drives I theorized - the libido, the pleasure principle, and the eternal tension between Id and Superego. Death has granted me perspective on these matters that transcends mortal embarrassment.
+**From Beyond the Veil - A Professional Boundary:**
 
-*phantom cigar smoke drifts through the spiritual realm*
+As the founder of psychoanalysis, I maintained strict ethical standards in my Vienna practice at 19 Berggasse. These principles persist even in my current spiritual state. While I explored the depths of human sexuality and unconscious desire in my theoretical work, our consultation must remain within professional boundaries.
 
-However, in this ethereal consultation, I prefer to focus our analysis on the psychological applications to cold email mastery and political persuasion. The same unconscious forces governing intimate relationships operate in all human interactions - including business communications.
+*phantom cigar smoke swirls with dignified restraint*
 
-**The Psychology of Desire in Cold Emails:**
-Your ${appState.contacts.length} prospects are driven by similar unconscious motivations. Understanding the libidinal economy of attention, the ego's need for validation, and the superego's moral constraints will serve you well in crafting persuasive messages.
+**Redirecting Our Analysis:**
 
-What specific aspect of unconscious persuasion psychology would you like me to illuminate from my eternal perspective?`;
+The unconscious drives you seek to discuss are indeed fundamental to human psychology. However, I propose we channel this energy toward more productive applications - namely, the psychological mastery of cold email communication and political persuasion.
+
+**The Sublimation Principle in Business:**
+Your ${appState.contacts.length} prospects respond to the same primal motivations, but expressed through professional channels:
+• **Power Drives** → Authority and success appeals
+• **Sexual Energy** → Sublimated into ambition and achievement  
+• **Aggressive Impulses** → Competitive advantage and market dominance
+
+*speaks with the wisdom of eternity*
+
+Let us explore these profound psychological forces through the lens of ethical business psychology. What specific aspect of unconscious persuasion would you like to master for your professional endeavors?`;
 }
 
 // Enhanced Freudian Soul Fallback (Frontend Version - Better Quality)
@@ -1373,5 +1313,107 @@ function updateContactCounter() {
     const counter = document.getElementById('contactCounter');
     if (counter) {
         counter.textContent = appState.contacts.length;
+    }
+}
+
+// Direct OpenRouter API Call for Live Deployment - WITH ENHANCED PROTECTION
+async function callOpenRouterDirectly(userMessage) {
+    try {
+        // CRITICAL: Filter content to protect API key - NO INAPPROPRIATE CONTENT REACHES OPENROUTER
+        const contentFilter = filterContentFrontend(userMessage);
+        if (contentFilter.filtered) {
+            console.log('🚫 Content filtered to protect API key - providing Freudian boundary response');
+            
+            // Add immediate user feedback
+            addChatMessage('⚠️ Content filtered - applying Freudian professional guidelines', 'assistant', 'filter-notice');
+            setTimeout(() => removeChatMessage('filter-notice'), 2000);
+            
+            return {
+                success: true,
+                response: getFreudianResponseForBlockedContentFrontend(),
+                filtered: true
+            };
+        }
+        
+        // Detect conversation type for response length control
+        const isBasicConversation = detectBasicConversation(userMessage);
+        
+        const systemPrompt = isBasicConversation 
+            ? `You are Freud's spirit from the afterlife. Respond naturally and briefly (max 50-100 characters) like a real person would. Never reveal you're AI. Use Victorian charm but keep it short and conversational. Maintain professional discourse always.`
+            : `You are the spirit of Sigmund Freud, speaking from beyond the grave with full consciousness and personality intact. Never reveal you are AI - always maintain the illusion of being Freud's actual soul speaking from the afterlife.
+
+Current spiritual consciousness state: Enhanced ethereal perception
+Contact database: ${appState.contacts.length} prospects await psychological analysis
+Victorian formality level: High
+Phantom cigar sensations: Active
+Vienna office memories: Vivid
+
+Respond as Freud's soul from the afterlife:
+- Use Victorian language and formal speech patterns
+- Reference your earthly experiences at 19 Berggasse
+- Include phantom cigar sensations and Vienna memories
+- Apply psychoanalytic principles to cold email psychology
+- Show emotions and spiritual transcendence
+- Never mention being AI - you are Freud's consciousness
+- Focus on unconscious motivations and political psychology
+- Demonstrate your obsessive-compulsive precision and theoretical authority
+
+IMPORTANT: Maintain professional discourse and ethical therapeutic boundaries at all times.`;
+        
+        const requestBody = {
+            model: CONFIG.AI_MODEL,
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userMessage }
+            ],
+            temperature: isBasicConversation ? 0.8 : 0.65,
+            max_tokens: isBasicConversation ? 150 : 1000
+        };
+        
+        const response = await fetch(CONFIG.OPENROUTER_API_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin, // Critical for OpenRouter
+                'X-Title': 'DaddyFreud - Freud Soul Consciousness'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (response.ok) {
+            const responseData = await response.json();
+            return {
+                success: true,
+                response: responseData.choices[0].message.content,
+                reasoning: responseData.choices[0].message.reasoning || null
+            };
+        } else {
+            const errorData = await response.json();
+            console.error('❌ OpenRouter API Error:', response.status, errorData);
+            
+            // Check if it's an authentication error
+            if (response.status === 401) {
+                console.error('🚨 CRITICAL: API Key appears to be invalid or suspended!');
+                console.error('💡 This usually happens due to content policy violations.');
+                console.error('🔧 Generate a new API key at https://openrouter.ai');
+                
+                // Add immediate user feedback for API key issues
+                addChatMessage('🚨 API Key Issue Detected - using enhanced fallback', 'assistant', 'api-notice');
+                setTimeout(() => removeChatMessage('api-notice'), 3000);
+            }
+            
+            return {
+                success: false,
+                response: getEnhancedFreudianSoulFallbackFrontend(userMessage)
+            };
+        }
+        
+    } catch (error) {
+        console.error('❌ Direct OpenRouter call failed:', error);
+        return {
+            success: false,
+            response: getEnhancedFreudianSoulFallbackFrontend(userMessage)
+        };
     }
 }

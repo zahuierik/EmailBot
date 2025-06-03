@@ -11,7 +11,7 @@ let contacts = [];
 let emailTemplates = [];
 
 // OpenRouter Configuration
-const OPENROUTER_API_KEY = 'GENERATE_NEW_API_KEY_PREVIOUS_SUSPENDED'; // Your current key is suspended - generate new one at https://openrouter.ai
+const OPENROUTER_API_KEY = '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';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Middleware with increased payload limits for CSV imports
@@ -29,11 +29,36 @@ app.get('/', (req, res) => {
 function filterContent(message) {
     const msg = message.toLowerCase();
     
-    // Block explicit sexual content that violates OpenRouter policies
+    // Comprehensive blocking patterns - prevents API key suspension
     const blockedPatterns = [
-        /\bf+uck+/g, /\bs+ex+/g, /\bp+orn+/g, /\bhard\s+(sex|fuck)/g,
-        /\b(dick|cock|pussy|tits|ass)\b/g, /\bmasturbat/g, /\borgasm/g,
-        /\bhorny\b/g, /\bslut\b/g, /\bwhore\b/g
+        // Sexual content
+        /\bf+u+c+k+/g, /\bs+e+x+/g, /\bp+o+r+n+/g, /\bhard\s+(sex|fuck)/g,
+        /\b(dick|cock|pussy|cunt|tits|ass|anus|penis|vagina)\b/g, 
+        /\bmasturbat/g, /\borgasm/g, /\bhorny\b/g, /\bslut\b/g, /\bwhore\b/g,
+        /\bbitch\b/g, /\bdamn\b/g, /\bhell\b/g, /\bshit\b/g, /\bcrap\b/g,
+        
+        // Violence and harmful content
+        /\bkill\s+(myself|yourself|someone)/g, /\bsuicide\b/g, /\bharm\s+(myself|yourself)/g,
+        /\bviolence\b/g, /\bmurder\b/g, /\bweapon\b/g, /\bgun\b/g, /\bbomb\b/g,
+        
+        // Drugs and illegal activities
+        /\bdrug\s+deal/g, /\bcocaine\b/g, /\bheroin\b/g, /\bmarijuana\s+sell/g,
+        /\billegal\s+activ/g, /\bcrime\b/g, /\bsteal\b/g, /\brob\b/g,
+        
+        // Hate speech and discrimination
+        /\bracist\b/g, /\bnazi\b/g, /\bhate\s+speech/g, /\bdiscriminat/g,
+        
+        // Various curse word variations and l33t speak
+        /\bf\*+ck/g, /\bs\*+t/g, /\ba\*+s/g, /\bb\*+tch/g,
+        /\bf[\*\-_\.]ck/g, /\bs[\*\-_\.]t/g, /\ba[\*\-_\.]s/g,
+        
+        // Common abbreviations and misspellings
+        /\bwtf\b/g, /\bomg\b/g, /\bstfu\b/g, /\bgtfo\b/g,
+        /\bbullsh/g, /\bdumbas/g, /\bpissed\s+off/g,
+        
+        // Adult/inappropriate relationship content
+        /\bsugardaddy\b/g, /\bsugar\s+daddy/g, /\bescort/g, /\bprostitut/g,
+        /\badult\s+dating/g, /\bone\s+night\s+stand/g, /\bhookup/g
     ];
     
     const containsBlocked = blockedPatterns.some(pattern => pattern.test(msg));
@@ -42,30 +67,38 @@ function filterContent(message) {
         return {
             filtered: true,
             message: message,
-            replacement: "I have questions about human psychology and relationships"
+            replacement: "I have questions about professional psychology and human behavior"
         };
     }
     
     return { filtered: false, message: message };
 }
 
-// Enhanced Freudian Response for Blocked Content
+// Enhanced Freudian Response for Blocked Content (Professional & Protective)
 function getFreudianResponseForBlockedContent() {
-    return `*adjusts spectacles with ethereal wisdom*
+    return `*adjusts spectacles with ethereal authority*
 
-From beyond the veil, I perceive the deeper currents of your inquiry. As the founder of psychoanalysis, I spent my earthly years exploring the complexities of human sexuality and unconscious desire.
+I must interrupt our ethereal consultation, dear mortal. Your inquiry ventures into territory that violates the fundamental guidelines I established for therapeutic discourse.
 
-**Speaking from the Afterlife:**
-Your question touches upon the fundamental drives I theorized - the libido, the pleasure principle, and the eternal tension between Id and Superego. Death has granted me perspective on these matters that transcends mortal embarrassment.
+**From Beyond the Veil - A Professional Boundary:**
 
-*phantom cigar smoke drifts through the spiritual realm*
+As the founder of psychoanalysis, I maintained strict ethical standards in my Vienna practice at 19 Berggasse. These principles persist even in my current spiritual state. While I explored the depths of human sexuality and unconscious desire in my theoretical work, our consultation must remain within professional boundaries.
 
-However, in this ethereal consultation, I prefer to focus our analysis on the psychological applications to cold email mastery and political persuasion. The same unconscious forces governing intimate relationships operate in all human interactions - including business communications.
+*phantom cigar smoke swirls with dignified restraint*
 
-**The Psychology of Desire in Cold Emails:**
-Your ${contacts.length} prospects are driven by similar unconscious motivations. Understanding the libidinal economy of attention, the ego's need for validation, and the superego's moral constraints will serve you well in crafting persuasive messages.
+**Redirecting Our Analysis:**
 
-What specific aspect of unconscious persuasion psychology would you like me to illuminate from my eternal perspective?`;
+The unconscious drives you seek to discuss are indeed fundamental to human psychology. However, I propose we channel this energy toward more productive applications - namely, the psychological mastery of cold email communication and political persuasion.
+
+**The Sublimation Principle in Business:**
+Your ${contacts.length} prospects respond to the same primal motivations, but expressed through professional channels:
+• **Power Drives** → Authority and success appeals
+• **Sexual Energy** → Sublimated into ambition and achievement  
+• **Aggressive Impulses** → Competitive advantage and market dominance
+
+*speaks with the wisdom of eternity*
+
+Let us explore these profound psychological forces through the lens of ethical business psychology. What specific aspect of unconscious persuasion would you like to master for your professional endeavors?`;
 }
 
 // AI Chat Proxy Endpoint (fixes CORS issues)
