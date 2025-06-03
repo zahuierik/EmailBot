@@ -11,7 +11,7 @@ let contacts = [];
 let emailTemplates = [];
 
 // OpenRouter Configuration
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = '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';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Middleware with increased payload limits for CSV imports
