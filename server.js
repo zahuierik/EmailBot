@@ -11,7 +11,7 @@ let contacts = [];
 let emailTemplates = [];
 
 // OpenRouter Configuration
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = 'GENERATE_NEW_API_KEY_PREVIOUS_SUSPENDED'; // Your current key is suspended - generate new one at https://openrouter.ai
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Middleware with increased payload limits for CSV imports
@@ -324,8 +324,8 @@ function detectBasicConversation(msg) {
         /^(how are you|how r u|u ok|you okay)$/,
         /^(good|great|nice|cool|awesome|perfect)$/,
         /^(lol|haha|wtf|omg)$/,
-        /tea\?|coffee\?|drink\?/,
-        /^.{1,20}$/  // Very short messages (under 20 chars)
+        /tea\?|coffee\?|drink\?|cafe\?/,
+        /^.{1,15}$/  // Very short messages (under 15 chars)
     ];
     
     return basicPatterns.some(pattern => pattern.test(msg.trim()));

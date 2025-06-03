@@ -4,7 +4,7 @@ const CONFIG = {
     IS_LOCAL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
     API_BASE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://emailbot-f71m.onrender.com',
     // OpenRouter API Configuration for DeepSeek R1 0528 Qwen3 8B (Free)
-    OPENROUTER_API_KEY: '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',
+    OPENROUTER_API_KEY: 'GENERATE_NEW_API_KEY_PREVIOUS_SUSPENDED', // Your current key is suspended - generate new one at https://openrouter.ai
     OPENROUTER_API_URL: 'https://openrouter.ai/api/v1/chat/completions',
     AI_MODEL: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
     AI_ENABLED: true
@@ -759,8 +759,8 @@ function detectBasicConversation(message) {
         /^(how are you|how r u|u ok|you okay)$/,
         /^(good|great|nice|cool|awesome|perfect)$/,
         /^(lol|haha|wtf|omg)$/,
-        /tea\?|coffee\?|drink\?/,
-        /^.{1,20}$/  // Very short messages (under 20 chars)
+        /tea\?|coffee\?|drink\?|cafe\?/,
+        /^.{1,15}$/  // Very short messages (under 15 chars)
     ];
     
     return basicPatterns.some(pattern => pattern.test(msg.trim()));
